@@ -2,7 +2,7 @@
 
 **Land Use and Land Cover Classification for Albania using Sentinel-2 Satellite Imagery and Deep Learning**
 
-HTL Diplomarbeit | Supervised by Reuf Kozlica (Salzburg UAS)
+HTL Diplomarbeit
 
 ---
 
