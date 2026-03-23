@@ -1,4 +1,4 @@
-# Data — never push datasets to GitHub
+# Data
 data/
 
 # Model weights — too large for GitHub
