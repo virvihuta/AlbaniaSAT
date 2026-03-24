@@ -26,7 +26,7 @@ The accompanying web application (AlbaniaSAT Explorer) is in a separate reposito
 |------|------|
 | Virvi Huta | Dataset, model, backend, paper |
 | Suisa Shehi | Frontend, map UI, design |
-| Regis | Infrastructure, deployment |
+| Regis Balla | Infrastructure, deployment |
 | Reuf Kozlica | Supervisor |
 
 ---
