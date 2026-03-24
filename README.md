@@ -25,7 +25,7 @@ The accompanying web application (AlbaniaSAT Explorer) is in a separate reposito
 | Name | Role |
 |------|------|
 | Virvi Huta | Dataset, model, backend, paper |
-| Suisa | Frontend, map UI, design |
+| Suisa Shehi | Frontend, map UI, design |
 | Regis | Infrastructure, deployment |
 | Reuf Kozlica | Supervisor |
 
