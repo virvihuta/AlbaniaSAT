@@ -1,0 +1,9 @@
+AlbaniaSAT Class,Top EuroSAT Prediction,Confidence
+Broad-leaved Forest,SeaLake,77.60%
+Coniferous Forest,SeaLake,63.71%
+Shrubland,SeaLake,57.00%
+Agricultural,PermanentCrop,48.33%
+Grassland,PermanentCrop,53.65%
+Olive Groves,PermanentCrop,49.21%
+Urban,PermanentCrop,85.22%
+Water,SeaLake,93.49%
