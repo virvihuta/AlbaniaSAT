@@ -262,7 +262,7 @@ Code: MIT License
 
 ```bash
 # Clone the repo
-git clone https://github.com/yourusername/albaniasat
+git clone https://github.com/virvihuta/albaniasat
 cd albaniasat
 
 # Create virtual environment
