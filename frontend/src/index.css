@@ -1,0 +1,54 @@
+@import "tailwindcss";
+
+/* Every variable here becomes a Tailwind class: --color-primary -> bg-primary, text-primary */
+@theme {
+  /* Brand */
+  --color-primary: #bf1e2d;
+
+  /* Light mode (default) */
+  --color-background: #ffffff;
+  --color-surface: #f5f5f5;
+  --color-foreground: #1a1a1a;
+  --color-muted: #6b6b6b;
+  --color-border: #e0e0e0;
+
+  /* Land cover classes (for the map later): bg-lc-forest, bg-lc-water ... */
+  --color-lc-forest: #17643b;
+  --color-lc-shrubland: #6b9e3f;
+  --color-lc-grassland: #cbd05a;
+  --color-lc-cropland: #f0a93b;
+  --color-lc-builtup: #8c5ec4;
+  --color-lc-bare: #b9a48b;
+  --color-lc-water: #2b7fd4;
+
+  /* Fonts */
+  --font-sans: "Google Sans", "Segoe UI", Arial, sans-serif;
+  --font-heading: "Montserrat", sans-serif;
+}
+
+/* Dark mode: put data-theme="dark" on <html> and these colors take over */
+[data-theme="dark"] {
+  --color-background: #121212;
+  --color-surface: #1e1e1e;
+  --color-foreground: #f2f2f2;
+  --color-muted: #a0a0a0;
+  --color-border: #333333;
+}
+
+@layer base {
+  body {
+    @apply bg-background text-foreground;
+  }
+  h1, h2, h3 {
+    @apply font-heading font-bold;
+  }
+}
+
+/* Slow movement of the contour lines on the login page */
+.drift {
+  animation: drift 20s ease-in-out infinite alternate;
+}
+
+@keyframes drift {
+  to { transform: translate(-120px, -80px); }
+}
