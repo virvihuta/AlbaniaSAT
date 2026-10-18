@@ -27,11 +27,6 @@ async function post(path, body) {
   return data
 }
 
-// Only an admin can create new accounts (role is "admin" or "editor")
-export function register(name, email, password, role) {
-  return post('/auth/register', { name, email, password, role })
-}
-
 // Shares the logged in user with every page
 const AuthContext = createContext(null)
 
