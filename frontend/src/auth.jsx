@@ -6,17 +6,20 @@ import { Navigate } from 'react-router-dom'
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000'
 const MOCK = import.meta.env.VITE_MOCK_AUTH === 'true'
 
-// Sends data to the backend and returns its answer
+// Sends data to the backend and returns its answer. The token proves who is logged in.
 async function post(path, body) {
   // Test mode: wait half a second and pretend the backend said yes
   if (MOCK) {
     await new Promise((resolve) => setTimeout(resolve, 500))
-    return { token: 'demo-token', user: { name: body.name || 'Demo User', email: body.email } }
+    return { token: 'demo-token', user: { name: 'Demo Admin', email: body.email, role: 'admin' } }
   }
 
   const res = await fetch(API_URL + path, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: 'Bearer ' + localStorage.getItem('token'),
+    },
     body: JSON.stringify(body),
   })
   const data = await res.json().catch(() => ({}))
@@ -24,8 +27,9 @@ async function post(path, body) {
   return data
 }
 
-export function register(name, email, password) {
-  return post('/auth/register', { name, email, password })
+// Only an admin can create new accounts (role is "admin" or "editor")
+export function register(name, email, password, role) {
+  return post('/auth/register', { name, email, password, role })
 }
 
 // Shares the logged in user with every page
@@ -55,8 +59,10 @@ export function useAuth() {
   return useContext(AuthContext)
 }
 
-// Wrap a page in this to make it visible only when logged in
-export function ProtectedRoute({ children }) {
+// Protects the private area. With role="admin" only admins get in.
+export function ProtectedRoute({ role, children }) {
   const { user } = useAuth()
-  return user ? children : <Navigate to="/login" replace />
+  if (!user) return <Navigate to="/admin/login" replace />
+  if (role && user.role !== role) return <Navigate to="/admin" replace />
+  return children
 }
