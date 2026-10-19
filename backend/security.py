@@ -25,7 +25,7 @@ def create_token(user_id: int, role: str) -> str:
 
 
 def require_role(*roles: str):
-    """Use on protected endpoints, e.g. Depends(require_role("admin", "editor"))."""
+    """Use on protected endpoints, e.g. Depends(require_role("admin", "redakteur"))."""
 
     def check(credentials=Depends(HTTPBearer())):
         try:
