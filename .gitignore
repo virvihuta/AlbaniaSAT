@@ -46,3 +46,8 @@ logs/
 # Wandb (experiment tracking)
 wandb/
 .claude/
+
+# Xcode
+xcuserdata/
+DerivedData/
+*.xcuserstate
