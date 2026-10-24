@@ -5,6 +5,8 @@ from fastapi.middleware.cors import CORSMiddleware
 from articles import router as articles_router
 from auth import router as auth_router
 
+from classification import router as classification_router
+
 app = FastAPI(title="AlbaniaSAT API")
 
 # Allow the frontend (Vite dev server) to call the API
@@ -17,6 +19,7 @@ app.add_middleware(
 
 app.include_router(auth_router)
 app.include_router(articles_router)
+app.include_router(classification_router)
 
 
 @app.get("/")
