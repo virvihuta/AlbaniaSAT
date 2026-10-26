@@ -5,7 +5,7 @@ struct WelcomeView: View {
     @State private var page = 0
 
     // The 3 pages: image, headline, text
-    let pages = [
+    let pages: [(String, LocalizedStringKey, LocalizedStringKey)] = [
         ("welcome1", "See Albania from space",
          "Sentinel-2 imagery of the whole country, from the Alps to Butrint."),
         ("welcome2", "Seven classes on one map",
@@ -16,19 +16,6 @@ struct WelcomeView: View {
 
     var body: some View {
         VStack(spacing: 16) {
-
-            // "Skip" at the top right (not on the last page)
-            HStack {
-                Spacer()
-                if page < 2 {
-                    Button("Skip") {
-                        withAnimation { page = 2 }
-                    }
-                    .font(.montserrat(17))
-                    .foregroundStyle(Color.brandRed)
-                }
-            }
-            .frame(height: 30)
 
             // The 3 pages you can swipe
             TabView(selection: $page) {
@@ -67,7 +54,7 @@ struct WelcomeView: View {
                     print("Open the map")
                 }
             } label: {
-                Text(page < 2 ? "Next" : "Open the map")
+                Text(page < 2 ? LocalizedStringKey("Next") : LocalizedStringKey("Open the map"))
                     .font(.montserrat(20))
                     .frame(maxWidth: .infinity)
                     .padding()
@@ -77,9 +64,21 @@ struct WelcomeView: View {
             }
         }
         .padding(.horizontal, 20)
+        
+        // Oben in der Leiste: links automatisch "Zurück", rechts "Skip"
+        .toolbar {
+            if page < 2 {
+                Button("Skip") {
+                    withAnimation { page = 2 }
+                }
+                .foregroundStyle(Color.brandRed)
+            }
+        }
     }
 }
 
 #Preview {
-    WelcomeView()
+    NavigationStack {
+        WelcomeView()
+    }
 }

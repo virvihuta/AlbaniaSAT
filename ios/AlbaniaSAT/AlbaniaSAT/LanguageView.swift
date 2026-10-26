@@ -3,8 +3,6 @@ import SwiftUI
 struct LanguageView: View {
     // Die gewählte Sprache wird auf dem iPhone gespeichert
     @AppStorage("language") private var language = "en"
-    
-    @Binding var showWelcome: Bool
 
     // Die drei Sprachen: Code und Name
     let languages = [("sq", "Shqip"), ("en", "English"), ("de", "Deutsch")]
@@ -71,9 +69,9 @@ struct LanguageView: View {
 
             Spacer()
 
-            // Weiter-Button
-            Button {
-                showWelcome = true
+            // Weiter: öffnet die Welcome-Seiten
+            NavigationLink {
+                WelcomeView()
             } label: {
                 Text("Continue")
                     .font(.montserrat(20))
@@ -104,5 +102,7 @@ extension Font {
 }
 
 #Preview {
-    LanguageView(showWelcome: .constant(false))
+    NavigationStack {
+        LanguageView()
+    }
 }
