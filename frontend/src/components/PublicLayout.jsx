@@ -13,8 +13,8 @@ export default function PublicLayout({ children }) {
   return (
     <div className="flex min-h-screen flex-col">
       <header className="sticky top-0 z-10 border-b border-border bg-surface">
-        <div className="mx-auto flex h-20 max-w-7xl items-center gap-6 px-6 md:px-10">
-          <Logo />
+        <div className="mx-auto flex h-24 max-w-7xl items-center gap-6 px-6 md:px-10">
+          <Logo big />
           <nav className="flex h-full gap-2 sm:ml-10">
             {links.map((link) => (
               <NavLink
