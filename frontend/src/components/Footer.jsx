@@ -15,8 +15,8 @@ export default function Footer() {
           <Logo />
           <p className="mt-1 text-sm text-primary">Europe couldn't see Albania. Now it can.</p>
           <p className="mt-4 max-w-sm text-sm text-muted">
-            A Diplomarbeit project at HTL Shkodër, supervised by Prof. Reuf Kozlica. Land cover maps built from
-            Copernicus Sentinel-2 imagery.
+            Land cover maps of Albania at 10 m resolution, built from Copernicus Sentinel-2 imagery with a model
+            trained on Albanian ground truth.
           </p>
         </div>
 
@@ -33,9 +33,10 @@ export default function Footer() {
           </div>
         ))}
       </div>
-      <p className="mx-auto max-w-7xl border-t border-border px-6 py-6 text-xs text-muted md:px-10">
-        © 2026 AlbaniaSAT · HTL Shkodër
-      </p>
+      <div className="mx-auto flex max-w-7xl flex-wrap justify-between gap-2 border-t border-border px-6 py-6 text-xs text-muted md:px-10">
+        <p>© 2026 AlbaniaSAT. All rights reserved.</p>
+        <p>Contains modified Copernicus Sentinel data 2017–2024</p>
+      </div>
     </footer>
   )
 }
