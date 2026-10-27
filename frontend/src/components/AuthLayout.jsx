@@ -18,10 +18,13 @@ export default function AuthLayout({ title, subtitle, children }) {
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_0%_100%,rgba(191,30,45,0.55),transparent_60%)]" />
 
         <div className="relative flex w-full flex-col justify-between p-12 text-white">
-          <p className="font-heading text-sm font-semibold uppercase tracking-[0.3em]">AlbaniaSAT</p>
+          <div className="flex items-center gap-3">
+            <img src="/logo.png" alt="AlbaniaSAT logo" className="h-14 w-auto" />
+            <span className="font-heading text-[2rem] font-light tracking-tight">AlbaniaSAT</span>
+          </div>
 
           <div>
-            <h2 className="max-w-md text-4xl leading-tight">Europe couldn't see Albania. Now it can.</h2>
+            <h2 className="max-w-md text-5xl leading-tight">Europe couldn't see Albania. Now it can.</h2>
             <div className="mt-10 flex gap-10">
               {facts.map((fact) => (
                 <div key={fact.label}>
@@ -37,9 +40,7 @@ export default function AuthLayout({ title, subtitle, children }) {
       {/* Right half: the form */}
       <div className="flex w-full items-center justify-center px-6 md:w-1/2">
         <div className="w-full max-w-md">
-          <p className="mb-8 font-heading text-sm font-semibold uppercase tracking-[0.3em] text-primary md:hidden">
-            AlbaniaSAT
-          </p>
+          <img src="/logo.png" alt="AlbaniaSAT" className="mb-8 h-14 w-auto md:hidden" />
           <h1 className="text-3xl">{title}</h1>
           <p className="mt-1 mb-8 text-muted">{subtitle}</p>
           {children}
