@@ -46,7 +46,7 @@ def ingest(data: Ergebnis, x_api_key: str = Header()):
                 """),
                 werte,
             )
-    except IntegrityError as fehler:
+    except IntegrityError:
         raise HTTPException(status_code=400, detail="Falsche ID oder Ergebnis gibt es schon")
 
     return {"status": "gespeichert"}

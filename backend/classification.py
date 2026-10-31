@@ -24,6 +24,7 @@ def list_regions():
         ).mappings().all()
     return [dict(r) for r in rows]
 
+
 @router.get("/classification/{region_id}/{year}")
 def get_classification(region_id: int, year: int):
     """Ergebnis der Klassifikation für eine Region in einem Jahr."""
@@ -46,3 +47,18 @@ def get_classification(region_id: int, year: int):
     if not row:
         raise HTTPException(status_code=404, detail="Keine Daten für diese Region und dieses Jahr")
     return dict(row)
+
+
+@router.get("/classes")
+def list_classes():
+    """Die 7 Klassen mit Namen in 3 Sprachen und Farbe (für die Legende)."""
+    with engine.connect() as db:
+        rows = db.execute(
+            text("""
+                SELECT id, name_en, name_de, name_sq, color_hex
+                FROM land_cover_classes
+                ORDER BY id
+            """)
+        ).mappings().all()
+    return [dict(r) for r in rows]
+
