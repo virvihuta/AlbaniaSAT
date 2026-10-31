@@ -62,3 +62,34 @@ def list_classes():
         ).mappings().all()
     return [dict(r) for r in rows]
 
+
+@router.get("/classification/{region_id}")
+def get_classification_years(region_id: int):
+    """Alle Jahre einer Region, sortiert nach Jahr (für die Zeitreihe)."""
+    with engine.connect() as db:
+        # 1. Gibt es die Region?
+        region = db.execute(
+            text("SELECT id, name FROM regions WHERE id = :region_id"),
+            {"region_id": region_id},
+        ).mappings().first()
+        if not region:
+            raise HTTPException(status_code=404, detail="Region nicht gefunden")
+
+        # 2. Alle Jahre dieser Region holen (pro Jahr nur das neueste Ergebnis)
+        rows = db.execute(
+            text("""
+                SELECT DISTINCT ON (year)
+                       year, patch_count, class_distribution, dominant_class_id
+                FROM region_year_summaries
+                WHERE region_id = :region_id
+                ORDER BY year, generated_at DESC
+            """),
+            {"region_id": region_id},
+        ).mappings().all()
+
+    # 3. Antwort: Region und Liste der Jahre
+    return {
+        "region_id": region["id"],
+        "region_name": region["name"],
+        "years": [dict(r) for r in rows],
+    }
