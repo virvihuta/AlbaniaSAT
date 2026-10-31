@@ -5,6 +5,8 @@ from fastapi.middleware.cors import CORSMiddleware
 from admin_articles import router as admin_articles_router
 from articles import router as articles_router
 from auth import router as auth_router
+from classification import router as classification_router
+from ingest import router as ingest_router
 
 app = FastAPI(title="AlbaniaSAT API")
 
@@ -19,6 +21,8 @@ app.add_middleware(
 app.include_router(auth_router)
 app.include_router(articles_router)
 app.include_router(admin_articles_router)
+app.include_router(classification_router)
+app.include_router(ingest_router)
 
 
 @app.get("/")
