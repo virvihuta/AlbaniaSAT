@@ -32,7 +32,7 @@ def ingest(data: Ergebnis, x_api_key: str = Header()):
     werte = data.model_dump()
     werte["class_distribution"] = json.dumps(data.class_distribution)
 
-    # 3. In die Datenbank schreiben
+    # 3. In die Datenbank schreiben (neu einfügen oder altes Ergebnis ersetzen)
     try:
         with engine.begin() as db:
             db.execute(
@@ -43,10 +43,16 @@ def ingest(data: Ergebnis, x_api_key: str = Header()):
                     VALUES
                         (:region_id, :year, :model_version_id, CAST(:class_distribution AS jsonb),
                          :dominant_class_id, :patch_count, :ai_summary, now())
+                    ON CONFLICT (region_id, year, model_version_id) DO UPDATE SET
+                        class_distribution = EXCLUDED.class_distribution,
+                        dominant_class_id = EXCLUDED.dominant_class_id,
+                        patch_count = EXCLUDED.patch_count,
+                        ai_summary = EXCLUDED.ai_summary,
+                        generated_at = now()
                 """),
                 werte,
             )
     except IntegrityError:
-        raise HTTPException(status_code=400, detail="Falsche ID oder Ergebnis gibt es schon")
+        raise HTTPException(status_code=400, detail="Falsche ID (Region, Modell oder Klasse gibt es nicht)")
 
     return {"status": "gespeichert"}
