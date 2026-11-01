@@ -1,4 +1,5 @@
 # Endpoints für Regionen und Klassifikation (Regis)
+import json
 import os
 
 from fastapi import APIRouter, HTTPException
@@ -93,3 +94,28 @@ def get_classification_years(region_id: int):
         "region_name": region["name"],
         "years": [dict(r) for r in rows],
     }
+
+
+@router.get("/regions/geojson")
+def regions_geojson():
+    """Grenzen aller Regionen als GeoJSON (für die Karte)."""
+    with engine.connect() as db:
+        rows = db.execute(
+            text("""
+                SELECT id, name, code, ST_AsGeoJSON(geom, 6) AS geometry
+                FROM regions
+                ORDER BY name
+            """)
+        ).mappings().all()
+
+    # Jede Region wird ein "Feature": Form + Informationen
+    features = []
+    for r in rows:
+        features.append({
+            "type": "Feature",
+            "geometry": json.loads(r["geometry"]),
+            "properties": {"id": r["id"], "name": r["name"], "code": r["code"]},
+        })
+
+    # Alle Features zusammen sind eine "FeatureCollection"
+    return {"type": "FeatureCollection", "features": features}
