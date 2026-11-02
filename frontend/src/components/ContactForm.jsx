@@ -67,7 +67,7 @@ export default function ContactForm() {
         </span>
       </label>
 
-      {status === 'sent' && <p className="rounded-lg bg-background px-4 py-3 text-sm text-lc-forest">Thank you! Your message was sent.</p>}
+      {status === 'sent' && <p className="rounded-lg bg-background px-4 py-3 text-sm text-lc-coniferous">Thank you! Your message was sent.</p>}
       {status === 'failed' && <p className="rounded-lg bg-background px-4 py-3 text-sm text-primary">The message could not be sent. Please try again later.</p>}
 
       <button type="submit" disabled={status === 'sending'}

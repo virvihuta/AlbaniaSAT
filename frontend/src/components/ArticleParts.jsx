@@ -7,7 +7,7 @@ export function Cover({ article, className = '' }) {
   }
   return (
     <div
-      className={`bg-[linear-gradient(135deg,var(--color-lc-cropland)_0_35%,var(--color-lc-builtup)_35%_45%,var(--color-lc-grassland)_45%_60%,var(--color-lc-forest)_60%)] ${className}`}
+      className={`bg-[linear-gradient(135deg,var(--color-lc-cropland)_0_35%,var(--color-lc-builtup)_35%_45%,var(--color-lc-grass-shrub)_45%_60%,var(--color-lc-coniferous)_60%)] ${className}`}
     />
   )
 }

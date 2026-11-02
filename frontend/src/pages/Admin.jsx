@@ -49,7 +49,7 @@ export default function Admin() {
             <tr key={article.id} className="border-b border-border">
               <td className="py-3 font-semibold">{article.title}</td>
               <td>
-                <span className={article.status === 'published' ? 'text-lc-forest' : 'text-muted'}>{article.status}</span>
+                <span className={article.status === 'published' ? 'text-lc-coniferous' : 'text-muted'}>{article.status}</span>
               </td>
               <td className="text-muted">{formatDate(article.published_at)}</td>
               <td className="space-x-4 text-right">
