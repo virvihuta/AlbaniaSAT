@@ -12,13 +12,13 @@
   --color-muted: #6b6b6b;
   --color-border: #e0e0e0;
 
-  /* Land cover classes (for the map later): bg-lc-forest, bg-lc-water ... */
-  --color-lc-forest: #17643b;
-  --color-lc-shrubland: #6b9e3f;
-  --color-lc-grassland: #cbd05a;
+  /* The 7 land cover classes of the model. The list with codes is in src/landCover.js */
+  --color-lc-broadleaf: #4c9a3c;
+  --color-lc-coniferous: #17643b;
   --color-lc-cropland: #f0a93b;
+  --color-lc-grass-shrub: #cbd05a;
+  --color-lc-olive: #8f9e6b;
   --color-lc-builtup: #8c5ec4;
-  --color-lc-bare: #b9a48b;
   --color-lc-water: #2b7fd4;
 
   /* Fonts */

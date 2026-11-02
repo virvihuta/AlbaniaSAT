@@ -1,15 +1,6 @@
 import { Link } from 'react-router-dom'
 import PublicLayout from '../components/PublicLayout'
-
-const classes = [
-  { name: 'Forest', color: 'bg-lc-forest' },
-  { name: 'Shrubland', color: 'bg-lc-shrubland' },
-  { name: 'Grassland', color: 'bg-lc-grassland' },
-  { name: 'Cropland', color: 'bg-lc-cropland' },
-  { name: 'Built-up', color: 'bg-lc-builtup' },
-  { name: 'Bare ground', color: 'bg-lc-bare' },
-  { name: 'Water', color: 'bg-lc-water' },
-]
+import { landCoverClasses } from '../landCover'
 
 const stats = [
   { value: '80.94%', text: 'Test accuracy of the AlbaniaSAT model on held-out Albanian patches' },
@@ -43,9 +34,9 @@ export default function Home() {
           </div>
           <div className="self-end">
             <p className="eyebrow mb-3">Classes</p>
-            {classes.map((c) => (
-              <p key={c.name} className="mb-2 flex items-center gap-2 text-sm">
-                <span className={`h-3 w-3 rounded-sm ${c.color}`} /> {c.name}
+            {landCoverClasses.map((c) => (
+              <p key={c.code} className="mb-2 flex items-center gap-2 text-sm">
+                <span className="h-3 w-3 rounded-sm" style={{ backgroundColor: c.color }} /> {c.name}
               </p>
             ))}
           </div>
