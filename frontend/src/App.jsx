@@ -18,11 +18,11 @@ export default function App() {
       <Route path="/news/:slug" element={<NewsDetail />} />
       <Route path="/contact" element={<Contact />} />
 
-      {/* Private area: only for admins and editors */}
+      {/* Private area: articles for admins and editors, messages only for admins */}
       <Route path="/admin/login" element={<Login />} />
       <Route path="/admin" element={<ProtectedRoute><Admin /></ProtectedRoute>} />
       <Route path="/admin/articles/:id" element={<ProtectedRoute><ArticleForm /></ProtectedRoute>} />
-      <Route path="/admin/messages" element={<ProtectedRoute><Messages /></ProtectedRoute>} />
+      <Route path="/admin/messages" element={<ProtectedRoute role="admin"><Messages /></ProtectedRoute>} />
 
       {/* Unknown address: back to the start page */}
       <Route path="*" element={<Navigate to="/" replace />} />
