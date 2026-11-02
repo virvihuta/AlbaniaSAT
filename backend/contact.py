@@ -13,8 +13,8 @@ engine = create_engine(os.environ["DATABASE_URL"])
 # Router: eine Gruppe von Endpoints
 router = APIRouter()
 
-# Nur admin und redakteur dürfen die Nachrichten lesen
-editor = require_role("admin", "redakteur")
+# Nur der Admin darf die Nachrichten lesen
+admin_only = require_role("admin")
 
 
 # Diese Daten schickt das Formular
@@ -36,8 +36,8 @@ def send_contact(data: Kontakt):
 
 
 @router.get("/admin/contact")
-def list_contact_messages(user=Depends(editor)):
-    """Alle Kontaktnachrichten, die neuesten zuerst (nur admin und redakteur)."""
+def list_contact_messages(user=Depends(admin_only)):
+    """Alle Kontaktnachrichten, die neuesten zuerst (nur admin)."""
     with engine.connect() as db:
         rows = db.execute(text("""
                 SELECT id, name, email, message, created_at
