@@ -1,3 +1,4 @@
+import { NavLink } from 'react-router-dom'
 import { useAuth } from '../auth'
 import Logo from './Logo'
 
@@ -11,6 +12,17 @@ export default function AdminLayout({ children }) {
         <div className="flex items-center gap-3">
           <Logo to="/admin" big />
           <span className="rounded-full bg-primary px-2.5 py-0.5 text-xs font-semibold text-white">Admin</span>
+          <nav className="ml-6 flex gap-5 text-sm font-medium">
+            {[
+              { to: '/admin', label: 'Articles' },
+              { to: '/admin/messages', label: 'Messages' },
+            ].map((link) => (
+              <NavLink key={link.to} to={link.to} end
+                className={({ isActive }) => (isActive ? 'text-primary' : 'text-muted hover:text-foreground')}>
+                {link.label}
+              </NavLink>
+            ))}
+          </nav>
         </div>
         <div className="flex items-center gap-4">
           <span className="text-sm text-muted">{user.name}</span>
