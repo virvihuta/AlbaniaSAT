@@ -3,6 +3,7 @@ import { ProtectedRoute } from './auth'
 import Home from './pages/Home'
 import News from './pages/News'
 import NewsDetail from './pages/NewsDetail'
+import Contact from './pages/Contact'
 import Login from './pages/Login'
 import Admin from './pages/Admin'
 import ArticleForm from './pages/ArticleForm'
@@ -14,6 +15,7 @@ export default function App() {
       <Route path="/" element={<Home />} />
       <Route path="/news" element={<News />} />
       <Route path="/news/:slug" element={<NewsDetail />} />
+      <Route path="/contact" element={<Contact />} />
 
       {/* Private area: only for admins and editors */}
       <Route path="/admin/login" element={<Login />} />
