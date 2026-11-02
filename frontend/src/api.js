@@ -7,6 +7,17 @@ export async function getJSON(path) {
   return res.json()
 }
 
+// Sends data to a public endpoint, for example the contact form
+export async function postJSON(path, body) {
+  const res = await fetch(API_URL + path, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body),
+  })
+  if (!res.ok) throw new Error('Could not send data')
+  return res.json().catch(() => ({}))
+}
+
 // Turns "2026-10-24T14:00:00Z" into "24 Oct 2026"
 export function formatDate(value) {
   return value ? new Date(value).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) : ''
