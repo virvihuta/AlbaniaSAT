@@ -2,7 +2,7 @@ import { Link } from 'react-router-dom'
 import Logo from './Logo'
 
 const columns = [
-  { title: 'Platform', items: [{ label: 'Overview', to: '/' }, { label: 'Story', to: '/news' }] },
+  { title: 'Platform', items: [{ label: 'Overview', to: '/' }, { label: 'Story', to: '/news' }, { label: 'Contact', to: '/contact' }] },
   { title: 'Data sources', items: [{ label: 'Copernicus Sentinel-2' }, { label: 'ESA WorldCover 2021' }, { label: 'CORINE Land Cover 2018' }] },
 ]
 
