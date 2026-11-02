@@ -7,6 +7,7 @@ const empty = { name: '', email: '', message: '' }
 function validate(form) {
   const errors = {}
   if (form.name.trim().length < 2) errors.name = 'Please enter your name.'
+  if (form.name.length > 100) errors.name = 'Your name can have at most 100 characters.'
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) errors.email = 'Please enter a valid email address.'
   if (form.message.trim().length < 10) errors.message = 'Your message needs at least 10 characters.'
   if (form.message.length > 2000) errors.message = 'Your message can have at most 2000 characters.'
