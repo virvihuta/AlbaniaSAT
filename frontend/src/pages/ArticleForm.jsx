@@ -3,8 +3,9 @@ import { Link, useNavigate, useParams } from 'react-router-dom'
 import { adminRequest } from '../api'
 import AdminLayout from '../components/AdminLayout'
 import { Field, SubmitButton, ErrorText } from '../components/Form'
+import { categories } from '../categories'
 
-const empty = { title: '', slug: '', summary: '', content: '', image_url: '', status: 'draft' }
+const empty = { title: '', slug: '', summary: '', content: '', image_url: '', category: '', status: 'draft' }
 
 // "My New Article!" -> "my-new-article", used for the address of the article
 function toSlug(text) {
@@ -24,7 +25,7 @@ export default function ArticleForm() {
   useEffect(() => {
     if (isNew) return
     adminRequest('GET', '/admin/articles/' + id)
-      .then((a) => setForm({ ...empty, ...a, summary: a.summary || '', image_url: a.image_url || '' }))
+      .then((a) => setForm({ ...empty, ...a, summary: a.summary || '', image_url: a.image_url || '', category: a.category || '' }))
       .catch((err) => setError(err.message))
   }, [id, isNew])
 
@@ -39,7 +40,7 @@ export default function ArticleForm() {
     e.preventDefault()
     setError('')
     setLoading(true)
-    const data = { ...form, summary: form.summary || null, image_url: form.image_url || null }
+    const data = { ...form, summary: form.summary || null, image_url: form.image_url || null, category: form.category || null }
     try {
       if (isNew) await adminRequest('POST', '/admin/articles', data)
       else await adminRequest('PUT', '/admin/articles/' + id, data)
@@ -69,6 +70,15 @@ export default function ArticleForm() {
         <label className="mb-4 block">
           <span className="mb-1 block text-sm font-medium">Content</span>
           <textarea name="content" rows={10} value={form.content} onChange={handleChange} className={boxClass} required />
+        </label>
+        <label className="mb-4 block">
+          <span className="mb-1 block text-sm font-medium">Topic</span>
+          <select name="category" value={form.category} onChange={handleChange} className={boxClass}>
+            <option value="">No topic</option>
+            {categories.map((c) => (
+              <option key={c.code} value={c.code}>{c.name}</option>
+            ))}
+          </select>
         </label>
         <label className="mb-4 block">
           <span className="mb-1 block text-sm font-medium">Status</span>

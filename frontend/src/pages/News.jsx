@@ -5,17 +5,19 @@ import PublicLayout from '../components/PublicLayout'
 import Pagination from '../components/Pagination'
 import YearFilter from '../components/YearFilter'
 import { Cover, Author } from '../components/ArticleParts'
+import { categories, categoryName } from '../categories'
 
 const PAGE_SIZE = 9
 
-// Public news page ("Story"): 9 stories per page, filter by year, search.
-// Everything lives in the address, for example /news?year=2025&page=2&q=forest,
+// Public news page ("Story"): 9 stories per page, filter by topic and year, search.
+// Everything lives in the address, for example /news?topic=forests&year=2025&page=2,
 // so links and the back button work.
 export default function News() {
   const [params, setParams] = useSearchParams()
   const page = Number(params.get('page')) || 1
   const q = params.get('q') || ''
   const year = params.get('year') || ''
+  const topic = params.get('topic') || ''
 
   const [search, setSearch] = useState(q)
   const [data, setData] = useState({ items: [], total: 0 })
@@ -30,7 +32,7 @@ export default function News() {
 
   // Builds the address: only the filters that are set, page 1 is left out
   function update(changes) {
-    const next = { q, year, page, ...changes }
+    const next = { topic, q, year, page, ...changes }
     setParams(Object.fromEntries(Object.entries(next).filter(([key, value]) => value && !(key === 'page' && value === 1))))
   }
 
@@ -44,15 +46,15 @@ export default function News() {
 
   // Load one page whenever page or search changes
   useEffect(() => {
-    const yearFilter = year ? `&year=${year}` : ''
-    getJSON(`/articles?q=${encodeURIComponent(q)}${yearFilter}&page=${page}&page_size=${PAGE_SIZE}`)
+    const filters = (year ? `&year=${year}` : '') + (topic ? `&category=${topic}` : '')
+    getJSON(`/articles?q=${encodeURIComponent(q)}${filters}&page=${page}&page_size=${PAGE_SIZE}`)
       .then((result) => {
         setData(result)
         setError('')
       })
       .catch((err) => setError(err.message))
       .finally(() => setLoading(false))
-  }, [q, year, page])
+  }, [q, year, topic, page])
 
   function goToPage(newPage) {
     update({ page: newPage })
@@ -61,7 +63,7 @@ export default function News() {
 
   const totalPages = Math.ceil(data.total / PAGE_SIZE)
   // The newest story is big, but only on the first page without search
-  const showFeatured = page === 1 && !q && !year && data.items.length > 0
+  const showFeatured = page === 1 && !q && !year && !topic && data.items.length > 0
   const [featured, ...rest] = showFeatured ? data.items : [null, ...data.items]
   const from = (page - 1) * PAGE_SIZE + 1
   const to = from + data.items.length - 1
@@ -74,7 +76,22 @@ export default function News() {
         Short reads on Albania's changing land, and on how AlbaniaSAT was built, written by the team.
       </p>
 
-      <div className="mt-8 flex flex-wrap items-center justify-between gap-4">
+      <nav className="mt-10 flex gap-6 overflow-x-auto border-b border-border">
+        {[{ code: '', name: 'All topics' }, ...categories].map((c) => (
+          <button
+            key={c.code || 'all'}
+            onClick={() => update({ topic: c.code, page: 1 })}
+            className={
+              '-mb-px shrink-0 border-b-2 pb-3 text-sm font-medium ' +
+              (topic === c.code ? 'border-primary text-foreground' : 'border-transparent text-muted hover:text-foreground')
+            }
+          >
+            {c.name}
+          </button>
+        ))}
+      </nav>
+
+      <div className="mt-6 flex flex-wrap items-center justify-between gap-4">
         <input
           className="w-full max-w-md rounded-full border border-border bg-surface px-5 py-2.5 outline-none focus:border-primary"
           placeholder="Search stories..."
@@ -100,6 +117,7 @@ export default function News() {
         <Link to={`/news/${featured.slug}`} className="group mt-10 grid overflow-hidden rounded-2xl border border-border bg-surface md:grid-cols-5">
           <Cover article={featured} className="h-64 w-full md:col-span-3 md:h-full md:min-h-96" />
           <div className="flex flex-col justify-center gap-6 p-8 md:col-span-2 md:p-10">
+            {featured.category && <p className="eyebrow -mb-3 text-primary">{categoryName(featured.category)}</p>}
             <h2 className="text-4xl group-hover:text-primary">{featured.title}</h2>
             {featured.summary && <p className="text-muted">{featured.summary}</p>}
             <Author article={featured} />
@@ -113,6 +131,7 @@ export default function News() {
           <Link key={article.id} to={`/news/${article.slug}`} className="group overflow-hidden rounded-2xl border border-border bg-surface">
             <Cover article={article} className="h-48 w-full" />
             <div className="space-y-3 p-6">
+              {article.category && <p className="eyebrow text-primary">{categoryName(article.category)}</p>}
               <h2 className="text-2xl group-hover:text-primary">{article.title}</h2>
               {article.summary && <p className="line-clamp-3 text-sm text-muted">{article.summary}</p>}
               <Author article={article} />

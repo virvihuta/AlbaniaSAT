@@ -3,6 +3,7 @@ import { Link, useParams } from 'react-router-dom'
 import { getJSON } from '../api'
 import PublicLayout from '../components/PublicLayout'
 import { Cover, Author } from '../components/ArticleParts'
+import { categoryName } from '../categories'
 
 // One article with its full text. The address looks like /news/new-sentinel-2-dataset
 export default function NewsDetail() {
@@ -20,6 +21,12 @@ export default function NewsDetail() {
     <PublicLayout>
       <p className="mx-auto max-w-3xl text-sm">
         <Link to="/news" className="text-primary hover:underline">Story</Link>
+        {article?.category && (
+          <>
+            <span className="text-muted"> › </span>
+            <Link to={`/news?topic=${article.category}`} className="text-primary hover:underline">{categoryName(article.category)}</Link>
+          </>
+        )}
         {article && <span className="text-muted"> › {article.title}</span>}
       </p>
 
