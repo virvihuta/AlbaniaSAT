@@ -7,45 +7,60 @@ import { Cover, Author } from '../components/ArticleParts'
 
 const PAGE_SIZE = 9
 
-// Public news page ("Story"): 9 stories per page. Page and search live in the address,
-// for example /news?page=2&q=forest, so links and the back button work.
+// Public news page ("Story"): 9 stories per page, filter by year, search.
+// Everything lives in the address, for example /news?year=2025&page=2&q=forest,
+// so links and the back button work.
 export default function News() {
   const [params, setParams] = useSearchParams()
   const page = Number(params.get('page')) || 1
   const q = params.get('q') || ''
+  const year = params.get('year') || ''
 
   const [search, setSearch] = useState(q)
   const [data, setData] = useState({ items: [], total: 0 })
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(true)
+  const [years, setYears] = useState([])
+
+  // Years that have stories, for the year buttons. Loaded once.
+  useEffect(() => {
+    getJSON('/articles/years').then(setYears).catch(() => setYears([]))
+  }, [])
+
+  // Builds the address: only the filters that are set, page 1 is left out
+  function update(changes) {
+    const next = { q, year, page, ...changes }
+    setParams(Object.fromEntries(Object.entries(next).filter(([key, value]) => value && !(key === 'page' && value === 1))))
+  }
 
   // Write the search into the address 300 ms after typing and start again at page 1
   useEffect(() => {
     const timer = setTimeout(() => {
-      if (search !== q) setParams(search ? { q: search } : {})
+      if (search !== q) update({ q: search, page: 1 })
     }, 300)
     return () => clearTimeout(timer)
-  }, [search, q, setParams])
+  })
 
   // Load one page whenever page or search changes
   useEffect(() => {
-    getJSON(`/articles?q=${encodeURIComponent(q)}&page=${page}&page_size=${PAGE_SIZE}`)
+    const yearFilter = year ? `&year=${year}` : ''
+    getJSON(`/articles?q=${encodeURIComponent(q)}${yearFilter}&page=${page}&page_size=${PAGE_SIZE}`)
       .then((result) => {
         setData(result)
         setError('')
       })
       .catch((err) => setError(err.message))
       .finally(() => setLoading(false))
-  }, [q, page])
+  }, [q, year, page])
 
   function goToPage(newPage) {
-    setParams(q ? { q, page: newPage } : { page: newPage })
+    update({ page: newPage })
     window.scrollTo({ top: 0, behavior: 'smooth' })
   }
 
   const totalPages = Math.ceil(data.total / PAGE_SIZE)
   // The newest story is big, but only on the first page without search
-  const showFeatured = page === 1 && !q && data.items.length > 0
+  const showFeatured = page === 1 && !q && !year && data.items.length > 0
   const [featured, ...rest] = showFeatured ? data.items : [null, ...data.items]
   const from = (page - 1) * PAGE_SIZE + 1
   const to = from + data.items.length - 1
@@ -65,6 +80,26 @@ export default function News() {
           value={search}
           onChange={(e) => setSearch(e.target.value)}
         />
+        {years.length > 0 && (
+          <div className="flex flex-wrap gap-2">
+            {[{ year: '', count: null }, ...years].map((y) => (
+              <button
+                key={y.year || 'all'}
+                onClick={() => update({ year: String(y.year), page: 1 })}
+                className={
+                  'rounded-full border px-4 py-1.5 text-sm font-medium ' +
+                  (String(y.year) === year ? 'border-primary bg-primary text-white' : 'border-border bg-surface hover:border-primary')
+                }
+              >
+                {y.year || 'All'}
+                {y.count !== null && <span className="ml-1 opacity-70">({y.count})</span>}
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
+
+      <div className="mt-4">
         {data.total > 0 && (
           <p className="text-sm text-muted">
             Showing {from}–{to} of {data.total} {data.total === 1 ? 'story' : 'stories'}
