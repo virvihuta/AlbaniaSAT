@@ -26,6 +26,27 @@ def test_classes():
     assert r.status_code == 200
     assert len(r.json()) == 7
     assert r.json()[0]["name_de"] == "Laubwald"
+    assert r.json()[0]["code"] == "broadleaf_forest"
+
+
+def test_years():
+    r = client.get("/years")
+    assert r.status_code == 200
+    assert isinstance(r.json(), list)
+
+
+def test_ingest_confidence_too_big():
+    data = {
+        "region_id": 10,
+        "year": 2021,
+        "model_version_id": 1,
+        "class_distribution": {"0": 0.5},
+        "dominant_class_id": 0,
+        "patch_count": 1,
+        "mean_confidence": 1.5,
+    }
+    r = client.post("/ingest/classification", json=data, headers={"X-API-Key": "falsch"})
+    assert r.status_code == 422
 
 
 def test_classification_years():

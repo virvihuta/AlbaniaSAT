@@ -34,8 +34,9 @@ def get_classification(region_id: int, year: int):
             text("""
                 SELECT s.region_id, r.name AS region_name, s.year,
                        s.patch_count, s.class_distribution, s.change_vs_previous,
-                       s.ai_summary, s.generated_at,
-                       s.dominant_class_id, c.name_en, c.name_de, c.name_sq, c.color_hex
+                       s.ai_summary, s.generated_at, s.mean_confidence,
+                       s.dominant_class_id, c.code AS dominant_code,
+                       c.name_en, c.name_de, c.name_sq, c.color_hex
                 FROM region_year_summaries s
                 JOIN regions r ON r.id = s.region_id
                 LEFT JOIN land_cover_classes c ON c.id = s.dominant_class_id
@@ -52,11 +53,11 @@ def get_classification(region_id: int, year: int):
 
 @router.get("/classes")
 def list_classes():
-    """Die 7 Klassen mit Namen in 3 Sprachen und Farbe (für die Legende)."""
+    """Die 7 Klassen mit Code, Namen in 3 Sprachen und Farbe (für die Legende)."""
     with engine.connect() as db:
         rows = db.execute(
             text("""
-                SELECT id, name_en, name_de, name_sq, color_hex
+                SELECT id, code, name_en, name_de, name_sq, color_hex
                 FROM land_cover_classes
                 ORDER BY id
             """)
@@ -80,7 +81,7 @@ def get_classification_years(region_id: int):
         rows = db.execute(
             text("""
                 SELECT DISTINCT ON (year)
-                       year, patch_count, class_distribution, dominant_class_id
+                       year, patch_count, class_distribution, dominant_class_id, mean_confidence
                 FROM region_year_summaries
                 WHERE region_id = :region_id
                 ORDER BY year, generated_at DESC
@@ -119,3 +120,13 @@ def regions_geojson():
 
     # Alle Features zusammen sind eine "FeatureCollection"
     return {"type": "FeatureCollection", "features": features}
+
+
+@router.get("/years")
+def list_years():
+    """Alle Jahre, für die es Ergebnisse gibt (für den Jahr-Filter auf der Karte)."""
+    with engine.connect() as db:
+        rows = db.execute(
+            text("SELECT DISTINCT year FROM region_year_summaries ORDER BY year")
+        ).mappings().all()
+    return [r["year"] for r in rows]
