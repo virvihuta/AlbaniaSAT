@@ -1,10 +1,25 @@
+import { useEffect, useState } from 'react'
 import { NavLink } from 'react-router-dom'
+import { adminRequest } from '../api'
 import { useAuth } from '../auth'
 import Logo from './Logo'
 
 // Header for the private area: user name and logout
 export default function AdminLayout({ children }) {
   const { user, logout } = useAuth()
+  const [unread, setUnread] = useState(0)
+
+  // Number of unread messages for the badge (admins only). Updates when a message is marked.
+  useEffect(() => {
+    if (user.role !== 'admin') return
+    const loadUnread = () =>
+      adminRequest('GET', '/admin/contact/unread-count')
+        .then((d) => setUnread(d.count))
+        .catch(() => setUnread(0))
+    loadUnread()
+    window.addEventListener('messages-changed', loadUnread)
+    return () => window.removeEventListener('messages-changed', loadUnread)
+  }, [user.role])
 
   // Editors only see the articles. Messages have personal data, so only admins see them.
   const links = [{ to: '/admin', label: 'Articles' }]
@@ -23,6 +38,9 @@ export default function AdminLayout({ children }) {
               <NavLink key={link.to} to={link.to} end
                 className={({ isActive }) => (isActive ? 'text-primary' : 'text-muted hover:text-foreground')}>
                 {link.label}
+                {link.to === '/admin/messages' && unread > 0 && (
+                  <span className="ml-1.5 rounded-full bg-primary px-1.5 py-0.5 text-xs font-semibold text-white">{unread}</span>
+                )}
               </NavLink>
             ))}
           </nav>
