@@ -42,3 +42,19 @@ def test_articles_year_without_articles():
     r = client.get("/articles?year=1990")
     assert r.status_code == 200
     assert r.json()["total"] == 0
+
+
+def test_articles_wrong_category():
+    r = client.get("/articles?category=abc")
+    assert r.status_code == 422
+
+
+def test_articles_category_filter():
+    r = client.get("/articles?category=forests")
+    assert r.status_code == 200
+    assert "total" in r.json()
+
+
+def test_admin_articles_wrong_status():
+    r = client.get("/admin/articles?status=abc")
+    assert r.status_code in (401, 422)

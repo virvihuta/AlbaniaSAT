@@ -24,7 +24,16 @@ def test_admin_contact_without_token():
     assert r.status_code == 401
 
 
-
 def test_admin_contact_years_without_token():
     r = client.get("/admin/contact/years")
+    assert r.status_code == 401
+
+
+def test_unread_count_without_token():
+    r = client.get("/admin/contact/unread-count")
+    assert r.status_code == 401
+
+
+def test_mark_read_without_token():
+    r = client.patch("/admin/contact/1", json={"is_read": True})
     assert r.status_code == 401
