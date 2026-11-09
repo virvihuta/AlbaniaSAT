@@ -3,6 +3,7 @@ import { Link, useSearchParams } from 'react-router-dom'
 import { getJSON } from '../api'
 import PublicLayout from '../components/PublicLayout'
 import Pagination from '../components/Pagination'
+import YearFilter from '../components/YearFilter'
 import { Cover, Author } from '../components/ArticleParts'
 
 const PAGE_SIZE = 9
@@ -80,23 +81,7 @@ export default function News() {
           value={search}
           onChange={(e) => setSearch(e.target.value)}
         />
-        {years.length > 0 && (
-          <div className="flex flex-wrap gap-2">
-            {[{ year: '', count: null }, ...years].map((y) => (
-              <button
-                key={y.year || 'all'}
-                onClick={() => update({ year: String(y.year), page: 1 })}
-                className={
-                  'rounded-full border px-4 py-1.5 text-sm font-medium ' +
-                  (String(y.year) === year ? 'border-primary bg-primary text-white' : 'border-border bg-surface hover:border-primary')
-                }
-              >
-                {y.year || 'All'}
-                {y.count !== null && <span className="ml-1 opacity-70">({y.count})</span>}
-              </button>
-            ))}
-          </div>
-        )}
+        <YearFilter years={years} value={year} onChange={(y) => update({ year: y, page: 1 })} />
       </div>
 
       <div className="mt-4">
