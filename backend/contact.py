@@ -2,7 +2,7 @@
 import os
 from typing import Optional
 
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel, Field
 from sqlalchemy import create_engine, text
 
@@ -26,6 +26,11 @@ class Kontakt(BaseModel):
     name: str = Field(min_length=2, max_length=100)
     email: str = Field(pattern=r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
     message: str = Field(min_length=10, max_length=2000)
+
+
+# Diese Daten schickt der Admin, wenn er eine Nachricht als gelesen markiert
+class Gelesen(BaseModel):
+    is_read: bool
 
 
 @router.post("/contact", status_code=201)
@@ -54,7 +59,7 @@ def list_contact_messages(
         ).scalar()
         rows = db.execute(
             text(f"""
-                SELECT id, name, email, message, created_at
+                SELECT id, name, email, message, created_at, status <> 'new' AS is_read
                 FROM contact_messages
                 {YEAR_FILTER}
                 ORDER BY created_at DESC, id DESC
@@ -65,6 +70,7 @@ def list_contact_messages(
     return {"items": [dict(r) for r in rows], "total": total, "page": page, "page_size": page_size}
 
 
+# /years und /unread-count müssen vor /{message_id} stehen
 @router.get("/admin/contact/years")
 def list_contact_years(user=Depends(admin_only)):
     """Jahre mit Kontaktnachrichten und wie viele, neuestes Jahr zuerst (nur admin)."""
@@ -76,3 +82,26 @@ def list_contact_years(user=Depends(admin_only)):
             ORDER BY year DESC
         """)).mappings().all()
     return [dict(r) for r in rows]
+
+
+@router.get("/admin/contact/unread-count")
+def unread_count(user=Depends(admin_only)):
+    """Wie viele Nachrichten noch nicht gelesen sind (für die Zahl im Menü)."""
+    with engine.connect() as db:
+        count = db.execute(text("SELECT count(*) FROM contact_messages WHERE status = 'new'")).scalar()
+    return {"count": count}
+
+
+@router.patch("/admin/contact/{message_id}")
+def mark_read(message_id: int, data: Gelesen, user=Depends(admin_only)):
+    """Nachricht als gelesen oder ungelesen markieren (nur admin)."""
+    # In der Datenbank heißt 'read' gelesen und 'new' ungelesen
+    new_status = "read" if data.is_read else "new"
+    with engine.begin() as db:
+        result = db.execute(
+            text("UPDATE contact_messages SET status = :status WHERE id = :id"),
+            {"status": new_status, "id": message_id},
+        )
+    if result.rowcount == 0:
+        raise HTTPException(status_code=404, detail="Nachricht nicht gefunden")
+    return {"id": message_id, "is_read": data.is_read}

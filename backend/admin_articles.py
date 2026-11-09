@@ -1,17 +1,21 @@
 # Article management for the private area: only admin and redakteur.
 import os
-from typing import Optional
+from typing import Literal, Optional
 
 from fastapi import APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel
 from sqlalchemy import create_engine, text
 from sqlalchemy.exc import IntegrityError
 
+from articles import Category
 from security import require_role
 
 engine = create_engine(os.environ["DATABASE_URL"])
 editor = require_role("admin", "redakteur")
 router = APIRouter(prefix="/admin/articles", dependencies=[Depends(editor)])
+
+# Search in the title and optional status (published or draft)
+ADMIN_FILTER = "WHERE lower(title) LIKE :q AND (:status IS NULL OR status = :status)"
 
 
 class ArticleData(BaseModel):
@@ -21,6 +25,7 @@ class ArticleData(BaseModel):
     content: str
     image_url: Optional[str] = None
     status: str = "draft"  # "draft" or "published"
+    category: Optional[Category] = None  # one of the 5 topics, or null
 
 
 def check(data: ArticleData):
@@ -31,25 +36,48 @@ def check(data: ArticleData):
 
 
 @router.get("")
-def list_all(q: str = "", page: int = Query(1, ge=1), page_size: int = Query(20, ge=1, le=100)):
-    """All articles, also drafts, last changed first, page by page. With ?q=... search in the title."""
+def list_all(
+    q: str = "",
+    status: Optional[Literal["published", "draft"]] = None,
+    page: int = Query(1, ge=1),
+    page_size: int = Query(20, ge=1, le=100),
+):
+    """All articles, also drafts, last changed first, page by page. Optional ?q=... and ?status=published or draft."""
     search = f"%{q.lower()}%"
+    params = {"q": search, "status": status}
     with engine.connect() as db:
-        total = db.execute(
-            text("SELECT count(*) FROM articles WHERE lower(title) LIKE :q"),
-            {"q": search},
-        ).scalar()
-        rows = db.execute(
+        # Numbers for the tabs: same search, but without the status filter
+        counts = db.execute(
             text("""
-                SELECT id, title, slug, status, published_at, updated_at
+                SELECT count(*) AS all_count,
+                       count(*) FILTER (WHERE status = 'published') AS published,
+                       count(*) FILTER (WHERE status = 'draft') AS draft
                 FROM articles
                 WHERE lower(title) LIKE :q
+            """),
+            {"q": search},
+        ).mappings().first()
+        total = db.execute(
+            text(f"SELECT count(*) FROM articles {ADMIN_FILTER}"),
+            params,
+        ).scalar()
+        rows = db.execute(
+            text(f"""
+                SELECT id, title, slug, status, category, published_at, updated_at
+                FROM articles
+                {ADMIN_FILTER}
                 ORDER BY updated_at DESC, id DESC
                 LIMIT :limit OFFSET :offset
             """),
-            {"q": search, "limit": page_size, "offset": (page - 1) * page_size},
+            {**params, "limit": page_size, "offset": (page - 1) * page_size},
         ).mappings().all()
-    return {"items": [dict(r) for r in rows], "total": total, "page": page, "page_size": page_size}
+    return {
+        "items": [dict(r) for r in rows],
+        "total": total,
+        "page": page,
+        "page_size": page_size,
+        "counts": {"all": counts["all_count"], "published": counts["published"], "draft": counts["draft"]},
+    }
 
 
 @router.get("/{article_id}")
@@ -67,8 +95,8 @@ def create(data: ArticleData, user=Depends(editor)):
     try:
         with engine.begin() as db:
             new_id = db.execute(text("""
-                INSERT INTO articles (title, slug, summary, content, image_url, status, author_id, published_at)
-                VALUES (:title, :slug, :summary, :content, :image_url, :status, :author,
+                INSERT INTO articles (title, slug, summary, content, image_url, status, category, author_id, published_at)
+                VALUES (:title, :slug, :summary, :content, :image_url, :status, :category, :author,
                         CASE WHEN :status = 'published' THEN CURRENT_TIMESTAMP END)
                 RETURNING id
             """), {**data.model_dump(), "author": int(user["sub"])}).scalar()
@@ -84,7 +112,7 @@ def update(article_id: int, data: ArticleData):
         with engine.begin() as db:
             result = db.execute(text("""
                 UPDATE articles SET title = :title, slug = :slug, summary = :summary, content = :content,
-                    image_url = :image_url, status = :status, updated_at = CURRENT_TIMESTAMP,
+                    image_url = :image_url, status = :status, category = :category, updated_at = CURRENT_TIMESTAMP,
                     published_at = CASE WHEN :status = 'published' THEN COALESCE(published_at, CURRENT_TIMESTAMP) END
                 WHERE id = :id
             """), {**data.model_dump(), "id": article_id})
