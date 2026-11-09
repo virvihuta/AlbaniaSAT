@@ -30,3 +30,15 @@ def test_articles_page_zero():
 def test_admin_articles_without_token():
     r = client.get("/admin/articles")
     assert r.status_code == 401
+
+
+def test_articles_years():
+    r = client.get("/articles/years")
+    assert r.status_code == 200
+    assert isinstance(r.json(), list)
+
+
+def test_articles_year_without_articles():
+    r = client.get("/articles?year=1990")
+    assert r.status_code == 200
+    assert r.json()["total"] == 0

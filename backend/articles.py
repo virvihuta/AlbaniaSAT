@@ -1,5 +1,6 @@
 # Public news endpoints: only published articles, newest first.
 import os
+from typing import Optional
 
 from fastapi import APIRouter, HTTPException, Query
 from sqlalchemy import create_engine, text
@@ -16,17 +17,23 @@ COLUMNS = """
 FILTER = """
     WHERE a.status = 'published'
       AND (lower(a.title) LIKE :q OR lower(coalesce(a.summary, '')) LIKE :q)
+      AND (:year IS NULL OR EXTRACT(YEAR FROM a.published_at) = :year)
 """
 
 
 @router.get("")
-def list_articles(q: str = "", page: int = Query(1, ge=1), page_size: int = Query(9, ge=1, le=50)):
-    """Published articles, page by page. With ?q=... only those whose title or summary contains the text."""
-    search = f"%{q.lower()}%"
+def list_articles(
+    q: str = "",
+    year: Optional[int] = None,
+    page: int = Query(1, ge=1),
+    page_size: int = Query(9, ge=1, le=50),
+):
+    """Published articles, page by page. Optional search (?q=...) and year filter (?year=2025)."""
+    params = {"q": f"%{q.lower()}%", "year": year}
     with engine.connect() as db:
         total = db.execute(
             text(f"SELECT count(*) FROM articles a {FILTER}"),
-            {"q": search},
+            params,
         ).scalar()
         rows = db.execute(
             text(f"""
@@ -36,9 +43,24 @@ def list_articles(q: str = "", page: int = Query(1, ge=1), page_size: int = Quer
                 ORDER BY a.published_at DESC, a.id DESC
                 LIMIT :limit OFFSET :offset
             """),
-            {"q": search, "limit": page_size, "offset": (page - 1) * page_size},
+            {**params, "limit": page_size, "offset": (page - 1) * page_size},
         ).mappings().all()
     return {"items": [dict(r) for r in rows], "total": total, "page": page, "page_size": page_size}
+
+
+# Must stay before /{slug}, otherwise FastAPI thinks "years" is a slug
+@router.get("/years")
+def list_years():
+    """Years with published articles and how many, newest year first."""
+    with engine.connect() as db:
+        rows = db.execute(text("""
+            SELECT CAST(EXTRACT(YEAR FROM published_at) AS int) AS year, count(*) AS count
+            FROM articles
+            WHERE status = 'published'
+            GROUP BY year
+            ORDER BY year DESC
+        """)).mappings().all()
+    return [dict(r) for r in rows]
 
 
 @router.get("/{slug}")
