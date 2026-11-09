@@ -1,9 +1,10 @@
 # Virvi schickt hier ihre Ergebnisse (Regis)
 import json
 import os
+from typing import Optional
 
 from fastapi import APIRouter, Header, HTTPException
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from sqlalchemy import create_engine, text
 from sqlalchemy.exc import IntegrityError
 
@@ -20,6 +21,8 @@ class Ergebnis(BaseModel):
     dominant_class_id: int
     patch_count: int
     ai_summary: str = ""
+    # Wie sicher das Modell im Durchschnitt ist (0 bis 1). Freiwillig.
+    mean_confidence: Optional[float] = Field(default=None, ge=0, le=1)
 
 
 @router.post("/ingest/classification", status_code=201)
@@ -39,15 +42,16 @@ def ingest(data: Ergebnis, x_api_key: str = Header()):
                 text("""
                     INSERT INTO region_year_summaries
                         (region_id, year, model_version_id, class_distribution,
-                         dominant_class_id, patch_count, ai_summary, generated_at)
+                         dominant_class_id, patch_count, ai_summary, mean_confidence, generated_at)
                     VALUES
                         (:region_id, :year, :model_version_id, CAST(:class_distribution AS jsonb),
-                         :dominant_class_id, :patch_count, :ai_summary, now())
+                         :dominant_class_id, :patch_count, :ai_summary, :mean_confidence, now())
                     ON CONFLICT (region_id, year, model_version_id) DO UPDATE SET
                         class_distribution = EXCLUDED.class_distribution,
                         dominant_class_id = EXCLUDED.dominant_class_id,
                         patch_count = EXCLUDED.patch_count,
                         ai_summary = EXCLUDED.ai_summary,
+                        mean_confidence = EXCLUDED.mean_confidence,
                         generated_at = now()
                 """),
                 werte,
