@@ -2,7 +2,7 @@
 import os
 from typing import Optional
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel
 from sqlalchemy import create_engine, text
 from sqlalchemy.exc import IntegrityError
@@ -31,13 +31,25 @@ def check(data: ArticleData):
 
 
 @router.get("")
-def list_all():
-    """All articles, also drafts, last changed first."""
+def list_all(q: str = "", page: int = Query(1, ge=1), page_size: int = Query(20, ge=1, le=100)):
+    """All articles, also drafts, last changed first, page by page. With ?q=... search in the title."""
+    search = f"%{q.lower()}%"
     with engine.connect() as db:
-        rows = db.execute(text(
-            "SELECT id, title, slug, status, published_at, updated_at FROM articles ORDER BY updated_at DESC"
-        )).mappings().all()
-    return [dict(r) for r in rows]
+        total = db.execute(
+            text("SELECT count(*) FROM articles WHERE lower(title) LIKE :q"),
+            {"q": search},
+        ).scalar()
+        rows = db.execute(
+            text("""
+                SELECT id, title, slug, status, published_at, updated_at
+                FROM articles
+                WHERE lower(title) LIKE :q
+                ORDER BY updated_at DESC, id DESC
+                LIMIT :limit OFFSET :offset
+            """),
+            {"q": search, "limit": page_size, "offset": (page - 1) * page_size},
+        ).mappings().all()
+    return {"items": [dict(r) for r in rows], "total": total, "page": page, "page_size": page_size}
 
 
 @router.get("/{article_id}")
