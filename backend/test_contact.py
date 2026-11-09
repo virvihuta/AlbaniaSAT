@@ -22,3 +22,9 @@ def test_contact_wrong_email():
 def test_admin_contact_without_token():
     r = client.get("/admin/contact")
     assert r.status_code == 401
+
+
+
+def test_admin_contact_years_without_token():
+    r = client.get("/admin/contact/years")
+    assert r.status_code == 401
