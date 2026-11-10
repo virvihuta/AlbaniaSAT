@@ -4,8 +4,11 @@ from datetime import datetime, timedelta, timezone
 
 import bcrypt
 import jwt
+from dotenv import load_dotenv
 from fastapi import Depends, HTTPException
 from fastapi.security import HTTPBearer
+
+load_dotenv()
 
 JWT_SECRET = os.environ["JWT_SECRET"]  # long random text, only in .env
 TOKEN_HOURS = 8

@@ -1,15 +1,12 @@
 # Endpoints für das Kontaktformular der Website (Regis)
-import os
 from typing import Optional
 
 from fastapi import APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel, Field
-from sqlalchemy import create_engine, text
+from sqlalchemy import text
 
+from db import engine
 from security import require_role
-
-# Verbindung zur Datenbank (Adresse kommt aus der .env)
-engine = create_engine(os.environ["DATABASE_URL"])
 
 # Router: eine Gruppe von Endpoints
 router = APIRouter()

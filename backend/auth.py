@@ -1,13 +1,11 @@
 # Login endpoint: checks the password against the hash and returns a JWT.
-import os
-
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
-from sqlalchemy import create_engine, text
+from sqlalchemy import text
 
+from db import engine
 from security import create_token, verify_password
 
-engine = create_engine(os.environ["DATABASE_URL"])
 router = APIRouter(prefix="/auth")
 
 

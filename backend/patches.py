@@ -4,10 +4,9 @@ import os
 from typing import Optional
 
 from fastapi import APIRouter
-from sqlalchemy import create_engine, text
+from sqlalchemy import text
 
-# Verbindung zur Datenbank (Adresse kommt aus der .env)
-engine = create_engine(os.environ["DATABASE_URL"])
+from db import engine
 
 # Router: eine Gruppe von Endpoints
 router = APIRouter()

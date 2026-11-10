@@ -5,10 +5,11 @@ from typing import Optional
 
 from fastapi import APIRouter, Header, HTTPException
 from pydantic import BaseModel, Field
-from sqlalchemy import create_engine, text
+from sqlalchemy import text
 from sqlalchemy.exc import IntegrityError
 
-engine = create_engine(os.environ["DATABASE_URL"])
+from db import engine
+
 router = APIRouter()
 
 

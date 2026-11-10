@@ -1,13 +1,11 @@
 # Creates an admin or redakteur (editor) account with a hashed password.
 # Usage: python create_user.py
 import getpass
-import os
 
-from sqlalchemy import create_engine, text
+from sqlalchemy import text
 
+from db import engine
 from security import hash_password
-
-engine = create_engine(os.environ["DATABASE_URL"])
 
 name = input("Name: ")
 email = input("Email: ")
