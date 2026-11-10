@@ -1,11 +1,11 @@
 # Public news endpoints: only published articles, newest first.
-import os
 from typing import Literal, Optional
 
 from fastapi import APIRouter, HTTPException, Query
-from sqlalchemy import create_engine, text
+from sqlalchemy import text
 
-engine = create_engine(os.environ["DATABASE_URL"])
+from db import engine
+
 router = APIRouter(prefix="/articles")
 
 # Allowed topics (the same list as the check in the database). Other values → 422

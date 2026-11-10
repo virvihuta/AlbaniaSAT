@@ -1,16 +1,15 @@
 # Article management for the private area: only admin and redakteur.
-import os
 from typing import Literal, Optional
 
 from fastapi import APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel
-from sqlalchemy import create_engine, text
+from sqlalchemy import text
 from sqlalchemy.exc import IntegrityError
 
 from articles import Category
+from db import engine
 from security import require_role
 
-engine = create_engine(os.environ["DATABASE_URL"])
 editor = require_role("admin", "redakteur")
 router = APIRouter(prefix="/admin/articles", dependencies=[Depends(editor)])
 

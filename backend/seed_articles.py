@@ -1,10 +1,8 @@
 # Adds two example news articles so the news page has something to show.
 # Usage: python seed_articles.py
-import os
+from sqlalchemy import text
 
-from sqlalchemy import create_engine, text
-
-engine = create_engine(os.environ["DATABASE_URL"])
+from db import engine
 
 articles = [
     {

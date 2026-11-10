@@ -1,12 +1,10 @@
 # Endpoints für Regionen und Klassifikation (Regis)
 import json
-import os
 
 from fastapi import APIRouter, HTTPException
-from sqlalchemy import create_engine, text
+from sqlalchemy import text
 
-# Verbindung zur Datenbank (Adresse kommt aus der .env)
-engine = create_engine(os.environ["DATABASE_URL"])
+from db import engine
 
 # Router: eine Gruppe von Endpoints
 router = APIRouter()
