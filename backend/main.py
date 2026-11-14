@@ -1,4 +1,6 @@
 # Starts the AlbaniaSAT API. Run from the backend folder: uvicorn main:app --reload
+import os
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -12,10 +14,14 @@ from patches import router as patches_router
 
 app = FastAPI(title="AlbaniaSAT API")
 
-# Allow the frontend (Vite dev server) to call the API
+# Websites that may call the API. FRONTEND_URL can hold several addresses, separated by commas,
+# e.g. "https://albaniasat.onrender.com,http://localhost:5173".
+# Without FRONTEND_URL only the local Vite dev server is allowed.
+FRONTEND_URLS = [url.strip() for url in os.environ.get("FRONTEND_URL", "http://localhost:5173").split(",")]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173"],
+    allow_origins=FRONTEND_URLS,
     allow_methods=["*"],
     allow_headers=["*"],
 )
