@@ -28,16 +28,7 @@ export default function Contact() {
         </div>
       </section>
 
-      <section className="mt-24 grid gap-10 lg:grid-cols-3">
-        <div>
-          <p className="eyebrow">FAQ</p>
-          <h2 className="mt-3 text-4xl">Questions</h2>
-          <p className="mt-4 text-muted">Something missing? Write to the team through the contact form.</p>
-        </div>
-        <div className="lg:col-span-2">
-          <Faq />
-        </div>
-      </section>
+      <Faq />
     </PublicLayout>
   )
 }

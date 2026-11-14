@@ -8,6 +8,7 @@ import Login from './pages/Login'
 import Admin from './pages/Admin'
 import ArticleForm from './pages/ArticleForm'
 import Messages from './pages/Messages'
+import AdminFaqs from './pages/AdminFaqs'
 
 export default function App() {
   return (
@@ -18,10 +19,11 @@ export default function App() {
       <Route path="/news/:slug" element={<NewsDetail />} />
       <Route path="/contact" element={<Contact />} />
 
-      {/* Private area: articles for admins and editors, messages only for admins */}
+      {/* Private area: articles and FAQ for admins and editors, messages only for admins */}
       <Route path="/admin/login" element={<Login />} />
       <Route path="/admin" element={<ProtectedRoute><Admin /></ProtectedRoute>} />
       <Route path="/admin/articles/:id" element={<ProtectedRoute><ArticleForm /></ProtectedRoute>} />
+      <Route path="/admin/faqs" element={<ProtectedRoute><AdminFaqs /></ProtectedRoute>} />
       <Route path="/admin/messages" element={<ProtectedRoute role="admin"><Messages /></ProtectedRoute>} />
 
       {/* Unknown address: back to the start page */}

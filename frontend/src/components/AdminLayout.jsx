@@ -21,8 +21,11 @@ export default function AdminLayout({ children }) {
     return () => window.removeEventListener('messages-changed', loadUnread)
   }, [user.role])
 
-  // Editors only see the articles. Messages have personal data, so only admins see them.
-  const links = [{ to: '/admin', label: 'Articles' }]
+  // Editors see articles and FAQ. Messages have personal data, so only admins see them.
+  const links = [
+    { to: '/admin', label: 'Articles' },
+    { to: '/admin/faqs', label: 'FAQ' },
+  ]
   if (user.role === 'admin') links.push({ to: '/admin/messages', label: 'Messages' })
 
   return (
