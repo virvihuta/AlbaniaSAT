@@ -30,6 +30,15 @@ export async function adminRequest(method, path, body) {
     headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + localStorage.getItem('token') },
     body: body ? JSON.stringify(body) : undefined,
   })
+
+  // Token expired or wrong: log out and go to the login page
+  if (res.status === 401) {
+    localStorage.removeItem('token')
+    localStorage.removeItem('user')
+    window.location.href = '/admin/login'
+    throw new Error('Your session has expired. Please log in again.')
+  }
+
   const data = await res.json().catch(() => ({}))
   if (!res.ok) throw new Error(typeof data.detail === 'string' ? data.detail : 'Please check the fields')
   return data
