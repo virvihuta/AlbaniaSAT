@@ -34,7 +34,7 @@ def require_role(*roles: str):
         try:
             payload = jwt.decode(credentials.credentials, JWT_SECRET, algorithms=["HS256"])
         except jwt.PyJWTError:
-            raise HTTPException(status_code=401, detail="Invalid or expired token")
+            raise HTTPException(status_code=401, detail="Invalid or expired token") from None
         if payload["role"] not in roles:
             raise HTTPException(status_code=403, detail="Not allowed")
         return payload

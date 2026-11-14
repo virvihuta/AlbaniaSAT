@@ -1,0 +1,19 @@
+# Ruff settings (checks the Python code in the whole repo)
+[tool.ruff]
+# Python version Ruff checks for.
+# Change to "py312" only when the whole team uses Python 3.12.
+target-version = "py39"
+# Our own Python files are here (needed for the import order)
+src = ["backend"]
+
+[tool.ruff.lint]
+# Enabled rule groups
+select = [
+    "E4", "E7", "E9",  # basic errors (e.g. wrong syntax)
+    "F",               # e.g. unused imports or variables
+    "I",               # import order
+    "B",               # common bugs ("bugbear")
+    "UP",              # modern Python style
+]
+# Does not fit FastAPI: Depends(...) and Query(...) as default values are correct there
+ignore = ["B008"]

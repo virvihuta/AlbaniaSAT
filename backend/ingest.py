@@ -58,6 +58,6 @@ def ingest(data: Ergebnis, x_api_key: str = Header()):
                 werte,
             )
     except IntegrityError:
-        raise HTTPException(status_code=400, detail="Falsche ID (Region, Modell oder Klasse gibt es nicht)")
+        raise HTTPException(status_code=400, detail="Falsche ID (Region, Modell oder Klasse gibt es nicht)") from None
 
     return {"status": "gespeichert"}
