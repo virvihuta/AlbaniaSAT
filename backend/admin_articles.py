@@ -100,7 +100,7 @@ def create(data: ArticleData, user=Depends(editor)):
                 RETURNING id
             """), {**data.model_dump(), "author": int(user["sub"])}).scalar()
     except IntegrityError:
-        raise HTTPException(status_code=409, detail="This slug is already used by another article")
+        raise HTTPException(status_code=409, detail="This slug is already used by another article") from None
     return {"id": new_id}
 
 
@@ -116,7 +116,7 @@ def update(article_id: int, data: ArticleData):
                 WHERE id = :id
             """), {**data.model_dump(), "id": article_id})
     except IntegrityError:
-        raise HTTPException(status_code=409, detail="This slug is already used by another article")
+        raise HTTPException(status_code=409, detail="This slug is already used by another article") from None
     if result.rowcount == 0:
         raise HTTPException(status_code=404, detail="Article not found")
     return {"ok": True}

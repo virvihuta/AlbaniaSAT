@@ -6,8 +6,8 @@ from admin_articles import router as admin_articles_router
 from articles import router as articles_router
 from auth import router as auth_router
 from classification import router as classification_router
-from ingest import router as ingest_router
 from contact import router as contact_router
+from ingest import router as ingest_router
 from patches import router as patches_router
 
 app = FastAPI(title="AlbaniaSAT API")

@@ -22,7 +22,7 @@ with engine.begin() as db:
     )
 
 # 2. Small app with the login and one protected endpoint
-from auth import router
+from auth import router  # noqa: E402 (must come after DATABASE_URL is set to SQLite)
 
 app = FastAPI()
 app.include_router(router)
