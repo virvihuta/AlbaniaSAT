@@ -5,15 +5,9 @@ import 'leaflet/dist/leaflet.css'
 // The whole country, used when no region is selected
 const ALBANIA = [[39.6, 19.2], [42.7, 21.1]]
 
-// Background maps without labels clutter, one for light and one for dark mode
-const TILES = {
-  light: 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',
-  dark: 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',
-}
-
-function currentTheme() {
-  return document.documentElement.dataset.theme === 'dark' ? 'dark' : 'light'
-}
+// Background map from OpenStreetMap (free, no key needed).
+// It is made grey in index.css, so our class colors stand out. In dark mode it is turned dark there too.
+const TILES = 'https://tile.openstreetmap.org/{z}/{x}/{y}.png'
 
 // Leaflet map of Albania: region borders and the patches of the selected region as colored dots.
 // The page decides what is selected, this component only draws it.
@@ -29,21 +23,14 @@ export default function AlbaniaMap({ regions, patches, selectedRegionId, selecte
     map.fitBounds(ALBANIA)
     L.control.zoom({ position: 'topright' }).addTo(map)
 
-    const tiles = L.tileLayer(TILES[currentTheme()], {
-      attribution: '&copy; OpenStreetMap contributors &copy; CARTO',
-      subdomains: 'abcd',
+    L.tileLayer(TILES, {
+      attribution: '&copy; OpenStreetMap contributors',
       maxZoom: 18,
+      className: 'map-tiles',
     }).addTo(map)
 
-    // Switch the background map when the theme button is clicked
-    const observer = new MutationObserver(() => tiles.setUrl(TILES[currentTheme()]))
-    observer.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] })
-
     mapRef.current = map
-    return () => {
-      observer.disconnect()
-      map.remove()
-    }
+    return () => map.remove()
   }, [])
 
   // 2. Draw the region borders. The selected region gets a red border.
