@@ -57,3 +57,29 @@
 @keyframes drift {
   to { transform: translate(-120px, -80px); }
 }
+
+/* Leaflet map: tooltips and controls in our colors and fonts */
+.leaflet-container {
+  font-family: var(--font-sans);
+  background: var(--color-background);
+}
+.map-tooltip {
+  border: 0;
+  border-radius: 6px;
+  background: #1a1a1a;
+  color: #fff;
+  font-weight: 600;
+  box-shadow: none;
+}
+.map-tooltip::before {
+  display: none;
+}
+[data-theme="dark"] .leaflet-bar a {
+  background: var(--color-surface);
+  color: var(--color-foreground);
+  border-color: var(--color-border);
+}
+[data-theme="dark"] .leaflet-control-attribution {
+  background: rgba(28, 28, 28, 0.8);
+  color: var(--color-muted);
+}
