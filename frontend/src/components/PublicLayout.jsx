@@ -5,16 +5,18 @@ import Footer from './Footer'
 
 const links = [
   { to: '/', label: 'Overview' },
+  { to: '/explorer', label: 'Explorer' },
   { to: '/news', label: 'Story' },
   { to: '/contact', label: 'Contact' },
 ]
 
-// Header with logo and navigation, the page content and the footer
-export default function PublicLayout({ children }) {
+// Header with logo and navigation, the page content and the footer.
+// full = true is for the map: the page uses the whole width and has no footer.
+export default function PublicLayout({ children, full = false }) {
   return (
     <div className="flex min-h-screen flex-col">
-      <header className="sticky top-0 z-10 border-b border-border bg-surface">
-        <div className="mx-auto flex h-24 max-w-7xl items-center gap-3 px-4 sm:gap-6 sm:px-6 md:px-10">
+      <header className="sticky top-0 z-[1100] border-b border-border bg-surface">
+        <div className={'mx-auto flex h-24 items-center gap-3 px-4 sm:gap-6 sm:px-6 md:px-10 ' + (full ? '' : 'max-w-7xl')}>
           <Logo big />
           <nav className="flex h-full sm:ml-10 sm:gap-2">
             {links.map((link) => (
@@ -39,9 +41,13 @@ export default function PublicLayout({ children }) {
         </div>
       </header>
 
-      <main className="mx-auto w-full max-w-7xl flex-1 px-6 py-16 md:px-10">{children}</main>
+      {full ? (
+        <main className="flex-1">{children}</main>
+      ) : (
+        <main className="mx-auto w-full max-w-7xl flex-1 px-6 py-16 md:px-10">{children}</main>
+      )}
 
-      <Footer />
+      {!full && <Footer />}
     </div>
   )
 }
