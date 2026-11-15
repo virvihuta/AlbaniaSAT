@@ -9,7 +9,7 @@ const stats = [
   { value: '~7,800', text: 'Labelled 64 × 64 px Sentinel-2 patches' },
 ]
 
-// Public start page. The interactive map comes into the card later (goal M-3.3).
+// Public start page. The card on the right leads to the map explorer.
 export default function Home() {
   return (
     <PublicLayout>
@@ -29,9 +29,14 @@ export default function Home() {
         </div>
 
         <div className="flex gap-4 rounded-2xl border border-border bg-surface p-6">
-          <div className="flex h-96 flex-1 items-center justify-center rounded-xl bg-background text-center text-sm text-muted">
-            The interactive map comes here.
-          </div>
+          <Link
+            to="/explorer"
+            className="group flex h-96 flex-1 flex-col items-center justify-center gap-3 rounded-xl bg-background text-center"
+          >
+            <span className="font-heading text-2xl font-light group-hover:text-primary">Explore the map</span>
+            <span className="text-sm text-muted">Regions, classes and Sentinel-2 patches</span>
+            <span className="mt-2 rounded-lg bg-primary px-5 py-2.5 text-sm font-semibold text-white group-hover:opacity-90">Open the explorer →</span>
+          </Link>
           <div className="self-end">
             <p className="eyebrow mb-3">Classes</p>
             {landCoverClasses.map((c) => (
