@@ -25,3 +25,12 @@ def test_patches_have_point_and_image_url():
 def test_patches_wrong_type():
     r = client.get("/patches/geojson?region_id=abc")
     assert r.status_code == 422
+
+
+def test_patch_years():
+    r = client.get("/patches/years")
+    assert r.status_code == 200
+    years = r.json()
+    assert isinstance(years, list)
+    # Oldest year first
+    assert years == sorted(years)
