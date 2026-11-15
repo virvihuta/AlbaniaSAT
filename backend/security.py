@@ -1,6 +1,6 @@
 # Password hashing and JWT tokens for the admin login.
 import os
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 
 import bcrypt
 import jwt
@@ -23,7 +23,7 @@ def verify_password(password: str, password_hash: str) -> bool:
 
 
 def create_token(user_id: int, role: str) -> str:
-    expires = datetime.now(timezone.utc) + timedelta(hours=TOKEN_HOURS)
+    expires = datetime.now(UTC) + timedelta(hours=TOKEN_HOURS)
     return jwt.encode({"sub": str(user_id), "role": role, "exp": expires}, JWT_SECRET, algorithm="HS256")
 
 

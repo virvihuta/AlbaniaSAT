@@ -1,8 +1,7 @@
 # Ruff settings (checks the Python code in the whole repo)
 [tool.ruff]
-# Python version Ruff checks for.
-# Change to "py312" only when the whole team uses Python 3.12.
-target-version = "py39"
+# Python version Ruff checks for. The whole team, GitHub Actions and Render use Python 3.12.
+target-version = "py312"
 # Our own Python files are here (needed for the import order)
 src = ["backend"]
 

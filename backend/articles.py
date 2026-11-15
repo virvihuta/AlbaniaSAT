@@ -1,5 +1,5 @@
 # Public news endpoints: only published articles, newest first.
-from typing import Literal, Optional
+from typing import Literal
 
 from fastapi import APIRouter, HTTPException, Query
 from sqlalchemy import text
@@ -28,8 +28,8 @@ FILTER = """
 @router.get("")
 def list_articles(
     q: str = "",
-    year: Optional[int] = None,
-    category: Optional[Category] = None,
+    year: int | None = None,
+    category: Category | None = None,
     page: int = Query(1, ge=1),
     page_size: int = Query(9, ge=1, le=50),
 ):

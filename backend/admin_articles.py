@@ -1,5 +1,5 @@
 # Article management for the private area: only admin and redakteur.
-from typing import Literal, Optional
+from typing import Literal
 
 from fastapi import APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel
@@ -20,11 +20,11 @@ ADMIN_FILTER = "WHERE lower(title) LIKE :q AND (:status IS NULL OR status = :sta
 class ArticleData(BaseModel):
     title: str
     slug: str
-    summary: Optional[str] = None
+    summary: str | None = None
     content: str
-    image_url: Optional[str] = None
+    image_url: str | None = None
     status: str = "draft"  # "draft" or "published"
-    category: Optional[Category] = None  # one of the 5 topics, or null
+    category: Category | None = None  # one of the 5 topics, or null
 
 
 def check(data: ArticleData):
@@ -37,7 +37,7 @@ def check(data: ArticleData):
 @router.get("")
 def list_all(
     q: str = "",
-    status: Optional[Literal["published", "draft"]] = None,
+    status: Literal["published", "draft"] | None = None,
     page: int = Query(1, ge=1),
     page_size: int = Query(20, ge=1, le=100),
 ):
