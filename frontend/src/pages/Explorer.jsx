@@ -41,18 +41,19 @@ export default function Explorer() {
       .catch(() => setYears([]))
   }, [])
 
-  // Patches and summary of the selected region and year
+  // Patches and summary of the selected region (and year, if the API has years)
   useEffect(() => {
     setPatches(null)
     setSummary(null)
     setPatchId(null)
-    if (!regionId || !year) return
+    if (!regionId) return
     setLoading(true)
-    getJSON(`/patches/geojson?region_id=${regionId}&year=${year}`)
+    const yearFilter = year ? `&year=${year}` : ''
+    getJSON(`/patches/geojson?region_id=${regionId}${yearFilter}`)
       .then(setPatches)
       .catch(() => setError('The patches could not be loaded.'))
       .finally(() => setLoading(false))
-    getJSON(`/classification/${regionId}/${year}`).then(setSummary).catch(() => setSummary(null))
+    if (year) getJSON(`/classification/${regionId}/${year}`).then(setSummary).catch(() => setSummary(null))
   }, [regionId, year])
 
   // Class of a prediction: database id -> code -> our class with name and color
@@ -162,7 +163,8 @@ export default function Explorer() {
               <p className="eyebrow">Selected region</p>
               <h1 className="mt-3 text-4xl">{regionName}</h1>
               <p className="mt-2 text-sm text-muted">
-                {year} · {loading ? 'Loading patches...' : `${patches?.features.length ?? 0} patches`}
+                {year ? year + ' · ' : ''}
+                {loading ? 'Loading patches...' : `${patches?.features.length ?? 0} patches`}
               </p>
 
               {summary?.mean_confidence != null && (
