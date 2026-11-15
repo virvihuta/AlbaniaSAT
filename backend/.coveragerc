@@ -1,0 +1,8 @@
+# Settings for the test coverage (pytest-cov)
+[run]
+# These files are not counted: the tests themselves and two small helper scripts
+omit =
+    */test_*.py
+    */conftest.py
+    */create_user.py
+    */seed_articles.py

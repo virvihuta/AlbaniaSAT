@@ -34,6 +34,6 @@ jobs:
       - name: Ruff (check code)
         run: ruff check backend migrations
 
-      - name: Pytest (run tests)
+      - name: Pytest with coverage (run tests)
         working-directory: backend
-        run: pytest -v
+        run: pytest -v --cov=. --cov-report=term-missing --cov-fail-under=80

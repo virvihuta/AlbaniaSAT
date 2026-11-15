@@ -51,3 +51,6 @@ wandb/
 xcuserdata/
 DerivedData/
 *.xcuserstate
+# Test coverage results
+.coverage
+htmlcov/
