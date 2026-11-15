@@ -33,7 +33,9 @@ export default function Explorer() {
     getJSON('/classes')
       .then((list) => setClassIds(Object.fromEntries(list.map((c) => [c.id, c.code]))))
       .catch(() => setClassIds({}))
+    // Years with region results. As long as there are none, take the years of the patches.
     getJSON('/years')
+      .then((list) => (list.length > 0 ? list : getJSON('/patches/years')))
       .then((list) => {
         setYears(list)
         setYear(list[list.length - 1] ?? null)
@@ -86,6 +88,12 @@ export default function Explorer() {
       })
       .sort((a, b) => b.count - a.count)
   }, [patches, classOf])
+
+  // Average model confidence of the loaded patches (only patches with a prediction)
+  const patchConfidence = useMemo(() => {
+    const values = (patches?.features || []).map((f) => f.properties.confidence).filter((v) => v != null)
+    return values.length ? values.reduce((a, b) => a + b, 0) / values.length : null
+  }, [patches])
 
   const patch = patches?.features.find((f) => f.properties.id === patchId)?.properties
 
@@ -167,30 +175,40 @@ export default function Explorer() {
                 {loading ? 'Loading patches...' : `${patches?.features.length ?? 0} patches`}
               </p>
 
-              {summary?.mean_confidence != null && (
+              {summary?.mean_confidence != null ? (
                 <div className="mt-6 rounded-xl bg-background p-4">
                   <p className="text-xs uppercase tracking-wider text-muted">Average model confidence</p>
                   <p className="mt-1 font-heading text-3xl font-light">{percent(summary.mean_confidence)}</p>
                 </div>
+              ) : (
+                patchConfidence != null && (
+                  <div className="mt-6 rounded-xl bg-background p-4">
+                    <p className="text-xs uppercase tracking-wider text-muted">Model confidence on the sample patches</p>
+                    <p className="mt-1 font-heading text-3xl font-light">{percent(patchConfidence)}</p>
+                  </div>
+                )
               )}
 
               {patches && patches.features.length > 0 && (
                 <div className="mt-8">
-                  <p className="eyebrow mb-4">Classes in this region</p>
+                  <p className="eyebrow mb-4">Sample patches by class</p>
                   {shares.map((c) => (
                     <div key={c.code} className="mb-3">
                       <div className="flex justify-between text-sm">
                         <span className="flex items-center gap-2">
                           <span className="h-3 w-3 rounded-sm" style={{ backgroundColor: c.color }} /> {c.name}
                         </span>
-                        <span className="text-muted">{percent(c.share)}</span>
+                        <span className="text-muted">{c.count}</span>
                       </div>
                       <div className="mt-1.5 h-1.5 rounded-full bg-background">
                         <div className="h-full rounded-full" style={{ width: c.share * 100 + '%', backgroundColor: c.color }} />
                       </div>
                     </div>
                   ))}
-                  <p className="mt-4 text-xs text-muted">Share of the classified patches, not of the whole area.</p>
+                  <p className="mt-4 text-xs text-muted">
+                    The dataset has about the same number of patches for every class, so these numbers do not show the real land
+                    cover of the region. The full map of the region follows.
+                  </p>
                 </div>
               )}
 
