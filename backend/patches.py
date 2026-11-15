@@ -1,7 +1,6 @@
 # Endpoints für die Patches (Bild-Ausschnitte) auf der Karte (Regis)
 import json
 import os
-from typing import Optional
 
 from fastapi import APIRouter
 from sqlalchemy import text
@@ -20,7 +19,7 @@ IMAGE_BASE_URL = os.environ.get(
 
 
 @router.get("/patches/geojson")
-def patches_geojson(region_id: Optional[int] = None, year: Optional[int] = None):
+def patches_geojson(region_id: int | None = None, year: int | None = None):
     """Patches als Punkte für die Karte, mit Vorhersage und Bild-Link. Optional ?region_id=10&year=2021."""
     with engine.connect() as db:
         rows = db.execute(text("""

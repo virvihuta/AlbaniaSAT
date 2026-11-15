@@ -1,5 +1,4 @@
 # Endpoints für das Kontaktformular der Website (Regis)
-from typing import Optional
 
 from fastapi import APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel, Field
@@ -43,7 +42,7 @@ def send_contact(data: Kontakt):
 
 @router.get("/admin/contact")
 def list_contact_messages(
-    year: Optional[int] = None,
+    year: int | None = None,
     page: int = Query(1, ge=1),
     page_size: int = Query(20, ge=1, le=100),
     user=Depends(admin_only),

@@ -1,7 +1,6 @@
 # Virvi schickt hier ihre Ergebnisse (Regis)
 import json
 import os
-from typing import Optional
 
 from fastapi import APIRouter, Header, HTTPException
 from pydantic import BaseModel, Field
@@ -23,7 +22,7 @@ class Ergebnis(BaseModel):
     patch_count: int
     ai_summary: str = ""
     # Wie sicher das Modell im Durchschnitt ist (0 bis 1). Freiwillig.
-    mean_confidence: Optional[float] = Field(default=None, ge=0, le=1)
+    mean_confidence: float | None = Field(default=None, ge=0, le=1)
 
 
 @router.post("/ingest/classification", status_code=201)
