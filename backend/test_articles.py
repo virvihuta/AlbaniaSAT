@@ -58,3 +58,17 @@ def test_articles_category_filter():
 def test_admin_articles_wrong_status():
     r = client.get("/admin/articles?status=abc")
     assert r.status_code in (401, 422)
+
+
+def test_article_by_slug():
+    # Take the newest article and open it by its slug
+    items = client.get("/articles?page_size=1").json()["items"]
+    if items:
+        r = client.get("/articles/" + items[0]["slug"])
+        assert r.status_code == 200
+        assert "content" in r.json()
+
+
+def test_article_by_slug_not_found():
+    r = client.get("/articles/this-slug-does-not-exist")
+    assert r.status_code == 404
