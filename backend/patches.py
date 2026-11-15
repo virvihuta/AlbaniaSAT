@@ -1,4 +1,4 @@
-# Endpoints für die Patches (Bild-Ausschnitte) auf der Karte (Regis)
+# Endpoints for the patches (image tiles) on the map (Regis)
 import json
 import os
 
@@ -7,20 +7,28 @@ from sqlalchemy import text
 
 from db import engine
 
-# Router: eine Gruppe von Endpoints
 router = APIRouter()
 
-# Anfang der Bild-Adresse in Supabase Storage (Bucket "patches", öffentlich).
-# Nicht geheim. Kann in der .env mit PATCH_IMAGE_BASE_URL geändert werden.
+# Start of the image address in Supabase Storage (bucket "patches", public).
+# Not a secret. Can be changed in the .env with PATCH_IMAGE_BASE_URL.
 IMAGE_BASE_URL = os.environ.get(
     "PATCH_IMAGE_BASE_URL",
     "https://rvakheaddvgnokymcwgr.supabase.co/storage/v1/object/public/patches/",
 )
 
 
+# Must stay before a future /patches/{patch_id}, otherwise FastAPI would think "years" is an id
+@router.get("/patches/years")
+def patch_years():
+    """Years that have patches, oldest first (for the year buttons on the map)."""
+    with engine.connect() as db:
+        rows = db.execute(text("SELECT DISTINCT year FROM patches ORDER BY year")).mappings().all()
+    return [r["year"] for r in rows]
+
+
 @router.get("/patches/geojson")
 def patches_geojson(region_id: int | None = None, year: int | None = None):
-    """Patches als Punkte für die Karte, mit Vorhersage und Bild-Link. Optional ?region_id=10&year=2021."""
+    """Patches as points for the map, with prediction and image link. Optional ?region_id=10&year=2021."""
     with engine.connect() as db:
         rows = db.execute(text("""
             SELECT DISTINCT ON (p.id)
@@ -36,6 +44,7 @@ def patches_geojson(region_id: int | None = None, year: int | None = None):
             ORDER BY p.id, pr.model_version_id DESC
         """), {"base": IMAGE_BASE_URL, "region_id": region_id, "year": year}).mappings().all()
 
+    # Each patch becomes a GeoJSON feature: a point with information
     features = []
     for r in rows:
         features.append({
