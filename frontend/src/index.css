@@ -74,6 +74,13 @@
 .map-tooltip::before {
   display: none;
 }
+/* Grey background map, and a dark one in dark mode */
+.map-tiles {
+  filter: grayscale(1) brightness(1.05) contrast(0.9);
+}
+[data-theme="dark"] .map-tiles {
+  filter: grayscale(1) invert(1) brightness(0.75) contrast(0.9);
+}
 [data-theme="dark"] .leaflet-bar a {
   background: var(--color-surface);
   color: var(--color-foreground);
