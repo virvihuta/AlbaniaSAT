@@ -21,7 +21,7 @@ const fallback = [
   {
     id: 'f4',
     question: 'Which years can I compare?',
-    answer: 'The classification covers 2017 to 2024, so you can compare how land cover changed over these years.',
+    answer: 'Right now the map shows 2021. More years between 2017 and 2024 will follow, so you will be able to compare how land cover changes over time.',
   },
 ]
 
