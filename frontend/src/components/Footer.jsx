@@ -35,7 +35,7 @@ export default function Footer() {
       </div>
       <div className="mx-auto flex max-w-7xl flex-wrap justify-between gap-2 border-t border-border px-6 py-6 text-xs text-muted md:px-10">
         <p>© 2026 AlbaniaSAT. All rights reserved.</p>
-        <p>Contains modified Copernicus Sentinel data 2017–2024</p>
+        <p>Contains modified Copernicus Sentinel data 2021</p>
       </div>
     </footer>
   )
