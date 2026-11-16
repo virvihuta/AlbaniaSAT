@@ -28,7 +28,7 @@ def patch_years():
 
 @router.get("/patches/geojson")
 def patches_geojson(region_id: int | None = None, year: int | None = None):
-    """Patches as points for the map, with prediction and image link. Optional ?region_id=10&year=2021."""
+    """Patches as points for the map, with prediction, model version and image link. Optional ?region_id=10&year=2021."""
     with engine.connect() as db:
         rows = db.execute(text("""
             SELECT DISTINCT ON (p.id)
@@ -36,9 +36,11 @@ def patches_geojson(region_id: int | None = None, year: int | None = None):
                 ST_AsGeoJSON(p.center_geom, 6) AS geometry,
                 pr.predicted_class_id,
                 CAST(pr.confidence AS float) AS confidence,
+                mv.label AS model_version,
                 :base || p.preview_path AS image_url
             FROM patches p
             LEFT JOIN predictions pr ON pr.patch_id = p.id
+            LEFT JOIN model_versions mv ON mv.id = pr.model_version_id
             WHERE (:region_id IS NULL OR p.region_id = :region_id)
               AND (:year IS NULL OR p.year = :year)
             ORDER BY p.id, pr.model_version_id DESC
@@ -56,6 +58,7 @@ def patches_geojson(region_id: int | None = None, year: int | None = None):
                 "year": r["year"],
                 "predicted_class_id": r["predicted_class_id"],
                 "confidence": r["confidence"],
+                "model_version": r["model_version"],
                 "reference_class_id": r["reference_class_id"],
                 "image_url": r["image_url"],
             },

@@ -34,3 +34,10 @@ def test_patch_years():
     assert isinstance(years, list)
     # Oldest year first
     assert years == sorted(years)
+
+
+def test_patches_geojson_has_model_version():
+    response = client.get("/patches/geojson?year=2021")
+    assert response.status_code == 200
+    first = response.json()["features"][0]
+    assert first["properties"]["model_version"] == "AlbaniaSAT-SoftCon-7class-v1"
