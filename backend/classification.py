@@ -63,6 +63,16 @@ def list_classes():
     return [dict(r) for r in rows]
 
 
+def calculate_change(previous, current):
+    """Share this year minus share last year, for each class. None for the first year."""
+    if previous is None or current is None:
+        return None
+    change = {}
+    for code in current:
+        change[code] = round(current[code] - previous.get(code, 0), 4)
+    return change
+
+
 @router.get("/classification/{region_id}")
 def get_classification_years(region_id: int):
     """Alle Jahre einer Region, sortiert nach Jahr (für die Zeitreihe)."""
@@ -79,7 +89,8 @@ def get_classification_years(region_id: int):
         rows = db.execute(
             text("""
                 SELECT DISTINCT ON (year)
-                       year, patch_count, class_distribution, dominant_class_id, mean_confidence
+                       year, patch_count, class_distribution, dominant_class_id,
+                       mean_confidence, ai_summary
                 FROM region_year_summaries
                 WHERE region_id = :region_id
                 ORDER BY year, generated_at DESC
@@ -87,11 +98,20 @@ def get_classification_years(region_id: int):
             {"region_id": region_id},
         ).mappings().all()
 
-    # 3. Antwort: Region und Liste der Jahre
+    # 3. Add the change compared to the year before
+    years = []
+    previous = None
+    for r in rows:
+        year = dict(r)
+        year["change_vs_previous"] = calculate_change(previous, year["class_distribution"])
+        years.append(year)
+        previous = year["class_distribution"]
+
+    # 4. Antwort: Region und Liste der Jahre
     return {
         "region_id": region["id"],
         "region_name": region["name"],
-        "years": [dict(r) for r in rows],
+        "years": years,
     }
 
 
