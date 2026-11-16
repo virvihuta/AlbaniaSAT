@@ -1,19 +1,18 @@
 import SwiftUI
 
 struct LanguageView: View {
-    // Die gewählte Sprache wird auf dem iPhone gespeichert
+    // The chosen language is saved on the iPhone
     @AppStorage("language") private var language = "en"
 
-    // Die drei Sprachen: Code und Name
+    // The three languages: code and name
     let languages = [("sq", "Shqip"), ("en", "English"), ("de", "Deutsch")]
 
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
-            
-            
-            // Logo und Name nebeneinander
+
+            // Logo and name next to each other
             HStack(spacing: 16) {
-                // Logo: rotes Rechteck hinten, weiße Linien vorne
+                // Logo: red rectangle in the back, white lines in front
                 ZStack {
                     Rectangle()
                         .fill(Color.brandRed)
@@ -33,14 +32,14 @@ struct LanguageView: View {
             .padding(.top, 40)
             .padding(.bottom, 40)
 
-            // Überschrift
+            // Title
             Text("Choose your language")
                 .font(.montserratBold(28))
             Text("You can change this later in Settings.")
                 .font(.montserrat(15))
                 .foregroundStyle(.secondary)
 
-            // Eine Zeile pro Sprache
+            // One row per language
             ForEach(languages, id: \.0) { code, name in
                 let selected = (language == code)
 
@@ -69,7 +68,7 @@ struct LanguageView: View {
 
             Spacer()
 
-            // Weiter: öffnet die Welcome-Seiten
+            // Continue: opens the welcome pages
             NavigationLink {
                 WelcomeView()
             } label: {
@@ -83,15 +82,21 @@ struct LanguageView: View {
             }
         }
         .padding(.horizontal, 20)
+        // Light/dark mode button at the top right
+        .toolbar {
+            ToolbarItem(placement: .topBarTrailing) {
+                AppearanceButton()
+            }
+        }
     }
 }
 
-// Unsere rote Markenfarbe aus dem Mockup
+// Our red brand color from the mockup
 extension Color {
     static let brandRed = Color(red: 0.75, green: 0.12, blue: 0.18)
 }
 
-// Unsere Schrift Montserrat
+// Our font Montserrat
 extension Font {
     static func montserrat(_ size: CGFloat) -> Font {
         .custom("Montserrat-Regular", size: size)
