@@ -1,16 +1,37 @@
+import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
+import { getJSON } from '../api'
 import PublicLayout from '../components/PublicLayout'
 import { landCoverClasses } from '../landCover'
 
-const stats = [
-  { value: '80.94%', text: 'Test accuracy of the AlbaniaSAT model on held-out Albanian patches' },
-  { value: '19.08%', text: 'Accuracy of a EuroSAT-trained model on the same Albanian data' },
-  { value: '7', text: 'Land cover classes, from forest to built-up land' },
-  { value: '~7,800', text: 'Labelled 64 × 64 px Sentinel-2 patches' },
-]
+// 0.8094 -> "80.94%"
+function percent(value) {
+  return (value * 100).toFixed(2) + '%'
+}
 
 // Public start page. The card on the right leads to the map explorer.
+// Accuracy and F1 score come from the API (GET /metrics), so they update when there is a new model.
 export default function Home() {
+  // Values of the current model. Used until the API answers, or if it cannot be reached.
+  const [model, setModel] = useState({ accuracy: 0.8094, f1_macro: 0.8138 })
+
+  useEffect(() => {
+    getJSON('/metrics')
+      .then((list) => {
+        // The list has one entry per model version. The newest one has the highest id.
+        const newest = list.reduce((a, b) => (b.id > a.id ? b : a), list[0])
+        if (newest) setModel(newest)
+      })
+      .catch(() => {})
+  }, [])
+
+  const stats = [
+    { value: percent(model.accuracy), text: `Test accuracy of the AlbaniaSAT model on held-out Albanian patches (macro F1 ${percent(model.f1_macro)})` },
+    { value: '19.08%', text: 'Accuracy of a EuroSAT-trained model on the same Albanian data' },
+    { value: '7', text: 'Land cover classes, from forest to built-up land' },
+    { value: '~7,800', text: 'Labelled 64 × 64 px Sentinel-2 patches' },
+  ]
+
   return (
     <PublicLayout>
       <section className="grid items-center gap-12 lg:grid-cols-2">
@@ -50,7 +71,7 @@ export default function Home() {
 
       <section className="mt-20 grid border-y border-border sm:grid-cols-2 lg:grid-cols-4">
         {stats.map((stat) => (
-          <div key={stat.value} className="border-border py-8 pr-6 lg:border-r lg:pl-6 lg:first:pl-0 lg:last:border-r-0">
+          <div key={stat.text} className="border-border py-8 pr-6 lg:border-r lg:pl-6 lg:first:pl-0 lg:last:border-r-0">
             <p className="font-heading text-5xl font-light">{stat.value}</p>
             <p className="mt-3 text-sm text-muted">{stat.text}</p>
           </div>
