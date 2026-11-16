@@ -11,6 +11,7 @@ from classification import router as classification_router
 from contact import router as contact_router
 from faqs import router as faqs_router
 from ingest import router as ingest_router
+from metrics import router as metrics_router
 from patches import router as patches_router
 
 app = FastAPI(title="AlbaniaSAT API")
@@ -35,6 +36,7 @@ app.include_router(ingest_router)
 app.include_router(contact_router)
 app.include_router(patches_router)
 app.include_router(faqs_router)
+app.include_router(metrics_router)
 
 
 @app.get("/")
