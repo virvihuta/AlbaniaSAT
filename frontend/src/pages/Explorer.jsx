@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { getJSON } from '../api'
 import PublicLayout from '../components/PublicLayout'
 import AlbaniaMap from '../components/AlbaniaMap'
@@ -8,6 +8,10 @@ import { landCoverClasses } from '../landCover'
 function realColor(cssVar) {
   const name = cssVar.slice(4, -1)
   return getComputedStyle(document.documentElement).getPropertyValue(name).trim() || '#999999'
+}
+
+function seconds(ms) {
+  return (ms / 1000).toFixed(1).replace('.0', '') + ' s'
 }
 
 function percent(value) {
@@ -25,7 +29,10 @@ export default function Explorer() {
   const [summary, setSummary] = useState(null)
   const [patchId, setPatchId] = useState(null)
   const [loading, setLoading] = useState(false)
+  const [loadTime, setLoadTime] = useState(null) // { ms, cached } of the last region load
   const [error, setError] = useState('')
+  // Regions that were already loaded: "regionId-year" -> { patches, summary, ms }. A second click is instant.
+  const cache = useRef(new Map())
 
   // Regions, classes and years are loaded once
   useEffect(() => {
@@ -43,19 +50,46 @@ export default function Explorer() {
       .catch(() => setYears([]))
   }, [])
 
-  // Patches and summary of the selected region (and year, if the API has years)
+  // Patches and summary of the selected region (and year, if the API has years).
+  // Each region is loaded only once and then taken from the cache. The load time is measured for the panel.
   useEffect(() => {
+    setPatchId(null)
     setPatches(null)
     setSummary(null)
-    setPatchId(null)
+    setLoadTime(null)
     if (!regionId) return
+
+    const key = `${regionId}-${year ?? 'all'}`
+    const saved = cache.current.get(key)
+    if (saved) {
+      setPatches(saved.patches)
+      setSummary(saved.summary)
+      setLoadTime({ ms: saved.ms, cached: true })
+      return
+    }
+
+    let cancelled = false // true when another region is chosen before this one has loaded
+    const start = performance.now()
     setLoading(true)
     const yearFilter = year ? `&year=${year}` : ''
-    getJSON(`/patches/geojson?region_id=${regionId}${yearFilter}`)
-      .then(setPatches)
-      .catch(() => setError('The patches could not be loaded.'))
-      .finally(() => setLoading(false))
-    if (year) getJSON(`/classification/${regionId}/${year}`).then(setSummary).catch(() => setSummary(null))
+    const patchRequest = getJSON(`/patches/geojson?region_id=${regionId}${yearFilter}`)
+    const summaryRequest = year ? getJSON(`/classification/${regionId}/${year}`).catch(() => null) : Promise.resolve(null)
+
+    Promise.all([patchRequest, summaryRequest])
+      .then(([patchData, summaryData]) => {
+        const ms = performance.now() - start
+        cache.current.set(key, { patches: patchData, summary: summaryData, ms })
+        if (cancelled) return
+        setPatches(patchData)
+        setSummary(summaryData)
+        setLoadTime({ ms, cached: false })
+      })
+      .catch(() => !cancelled && setError('The patches could not be loaded.'))
+      .finally(() => !cancelled && setLoading(false))
+
+    return () => {
+      cancelled = true
+    }
   }, [regionId, year])
 
   // Class of a prediction: database id -> code -> our class with name and color
@@ -174,6 +208,11 @@ export default function Explorer() {
                 {year ? year + ' · ' : ''}
                 {loading ? 'Loading patches...' : `${patches?.features.length ?? 0} patches`}
               </p>
+              {loadTime && (
+                <p className="mt-1 text-xs text-muted">
+                  {loadTime.cached ? `From cache · first load took ${seconds(loadTime.ms)}` : `Loaded in ${seconds(loadTime.ms)}`}
+                </p>
+              )}
 
               {summary?.mean_confidence != null ? (
                 <div className="mt-6 rounded-xl bg-background p-4">
@@ -252,6 +291,12 @@ export default function Explorer() {
                   <dt className="text-muted">Model confidence</dt>
                   <dd className="font-semibold">{percent(patch.confidence)}</dd>
                 </div>
+                {patch.model_version && (
+                  <div className="flex justify-between py-3">
+                    <dt className="text-muted">Model version</dt>
+                    <dd className="font-semibold">{patch.model_version}</dd>
+                  </div>
+                )}
                 <div className="flex justify-between py-3">
                   <dt className="text-muted">Reference label</dt>
                   <dd className="flex items-center gap-2">
