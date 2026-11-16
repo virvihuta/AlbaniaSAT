@@ -16,7 +16,7 @@ export default function Home() {
       <section className="grid items-center gap-12 lg:grid-cols-2">
         <div>
           <p className="eyebrow flex items-center gap-3">
-            <span className="h-px w-6 bg-primary" /> Land cover of Albania · Sentinel-2 · 2017–2024
+            <span className="h-px w-6 bg-primary" /> Land cover of Albania · Sentinel-2 · 2021, more years coming
           </p>
           <h1 className="mt-6 text-5xl leading-tight md:text-7xl">Europe couldn't see Albania. Now it can.</h1>
           <p className="mt-8 max-w-xl text-lg text-muted">
