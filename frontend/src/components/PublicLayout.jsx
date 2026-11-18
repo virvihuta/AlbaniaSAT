@@ -1,18 +1,22 @@
 import { NavLink } from 'react-router-dom'
+import { useLanguage } from '../i18n'
 import Logo from './Logo'
 import ThemeToggle from './ThemeToggle'
+import LanguageToggle from './LanguageToggle'
 import Footer from './Footer'
 
 const links = [
-  { to: '/', label: 'Overview' },
-  { to: '/explorer', label: 'Explorer' },
-  { to: '/news', label: 'Story' },
-  { to: '/contact', label: 'Contact' },
+  { to: '/', label: 'nav.overview' },
+  { to: '/explorer', label: 'nav.explorer' },
+  { to: '/news', label: 'nav.story' },
+  { to: '/contact', label: 'nav.contact' },
 ]
 
 // Header with logo and navigation, the page content and the footer.
 // full = true is for the map: the page uses the whole width and has no footer.
 export default function PublicLayout({ children, full = false }) {
+  const { t } = useLanguage()
+
   return (
     <div className="flex min-h-screen flex-col">
       <header className="sticky top-0 z-[1100] border-b border-border bg-surface">
@@ -31,11 +35,12 @@ export default function PublicLayout({ children, full = false }) {
                   (isActive ? 'text-foreground after:scale-x-100' : 'text-muted after:scale-x-0 hover:text-foreground hover:after:scale-x-100')
                 }
               >
-                {link.label}
+                {t(link.label)}
               </NavLink>
             ))}
           </nav>
-          <div className="ml-auto">
+          <div className="ml-auto flex items-center gap-2">
+            <LanguageToggle />
             <ThemeToggle />
           </div>
         </div>
