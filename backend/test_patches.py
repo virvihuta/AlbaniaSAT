@@ -41,3 +41,17 @@ def test_patches_geojson_has_model_version():
     assert response.status_code == 200
     first = response.json()["features"][0]
     assert first["properties"]["model_version"] == "AlbaniaSAT-SoftCon-7class-v1"
+
+
+def test_patch_by_id():
+    response = client.get("/patches/1")
+    assert response.status_code == 200
+    patch = response.json()
+    assert patch["id"] == 1
+    assert patch["probabilities"] is not None
+    assert patch["image_url"].startswith("https://")
+
+
+def test_patch_by_id_not_found():
+    response = client.get("/patches/999999")
+    assert response.status_code == 404
