@@ -1,23 +1,34 @@
 import { Link } from 'react-router-dom'
+import { useLanguage } from '../i18n'
 import Logo from './Logo'
-
-const columns = [
-  { title: 'Platform', items: [{ label: 'Overview', to: '/' }, { label: 'Explorer', to: '/explorer' }, { label: 'Story', to: '/news' }, { label: 'Contact', to: '/contact' }] },
-  { title: 'Data sources', items: [{ label: 'Copernicus Sentinel-2' }, { label: 'ESA WorldCover 2021' }, { label: 'CORINE Land Cover 2018' }] },
-]
 
 // Footer for all public pages
 export default function Footer() {
+  const { t } = useLanguage()
+
+  const columns = [
+    {
+      title: t('footer.platform'),
+      items: [
+        { label: t('nav.overview'), to: '/' },
+        { label: t('nav.explorer'), to: '/explorer' },
+        { label: t('nav.story'), to: '/news' },
+        { label: t('nav.contact'), to: '/contact' },
+      ],
+    },
+    {
+      title: t('footer.sources'),
+      items: [{ label: 'Copernicus Sentinel-2' }, { label: 'ESA WorldCover 2021' }, { label: 'CORINE Land Cover 2018' }],
+    },
+  ]
+
   return (
     <footer className="border-t border-border bg-surface">
       <div className="mx-auto grid max-w-7xl gap-10 px-6 py-14 md:grid-cols-4 md:px-10">
         <div className="md:col-span-2">
           <Logo />
-          <p className="mt-1 text-sm text-primary">Europe couldn't see Albania. Now it can.</p>
-          <p className="mt-4 max-w-sm text-sm text-muted">
-            Land cover maps of Albania at 10 m resolution, built from Copernicus Sentinel-2 imagery with a model
-            trained on Albanian ground truth.
-          </p>
+          <p className="mt-1 text-sm text-primary">{t('tagline')}</p>
+          <p className="mt-4 max-w-sm text-sm text-muted">{t('footer.about')}</p>
         </div>
 
         {columns.map((column) => (
@@ -34,8 +45,8 @@ export default function Footer() {
         ))}
       </div>
       <div className="mx-auto flex max-w-7xl flex-wrap justify-between gap-2 border-t border-border px-6 py-6 text-xs text-muted md:px-10">
-        <p>© 2026 AlbaniaSAT. All rights reserved.</p>
-        <p>Contains modified Copernicus Sentinel data 2021</p>
+        <p>{t('footer.rights')}</p>
+        <p>{t('footer.copernicus')}</p>
       </div>
     </footer>
   )
