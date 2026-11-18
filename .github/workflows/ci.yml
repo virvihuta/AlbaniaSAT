@@ -37,3 +37,6 @@ jobs:
       - name: Pytest with coverage (run tests)
         working-directory: backend
         run: pytest -v --cov=. --cov-report=term-missing --cov-fail-under=80
+
+      - name: Build Docker image
+        run: docker build -t albaniasat-api backend
