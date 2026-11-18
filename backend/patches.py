@@ -2,7 +2,7 @@
 import json
 import os
 
-from fastapi import APIRouter
+from fastapi import APIRouter, HTTPException
 from sqlalchemy import text
 
 from db import engine
@@ -17,7 +17,7 @@ IMAGE_BASE_URL = os.environ.get(
 )
 
 
-# Must stay before a future /patches/{patch_id}, otherwise FastAPI would think "years" is an id
+# Must stay before /patches/{patch_id}, otherwise FastAPI would think "years" is an id
 @router.get("/patches/years")
 def patch_years():
     """Years that have patches, oldest first (for the year buttons on the map)."""
@@ -64,3 +64,27 @@ def patches_geojson(region_id: int | None = None, year: int | None = None):
             },
         })
     return {"type": "FeatureCollection", "features": features}
+
+
+# Must stay at the end, after /patches/years and /patches/geojson
+@router.get("/patches/{patch_id}")
+def get_patch(patch_id: int):
+    """One patch with image link, prediction and the probabilities of all classes."""
+    with engine.connect() as db:
+        row = db.execute(text("""
+            SELECT p.id, p.region_id, p.year, p.reference_class_id,
+                   pr.predicted_class_id,
+                   CAST(pr.confidence AS float) AS confidence,
+                   pr.probabilities,
+                   mv.label AS model_version,
+                   :base || p.preview_path AS image_url
+            FROM patches p
+            LEFT JOIN predictions pr ON pr.patch_id = p.id
+            LEFT JOIN model_versions mv ON mv.id = pr.model_version_id
+            WHERE p.id = :patch_id
+            ORDER BY pr.model_version_id DESC
+            LIMIT 1
+        """), {"base": IMAGE_BASE_URL, "patch_id": patch_id}).mappings().first()
+    if not row:
+        raise HTTPException(status_code=404, detail="Patch not found")
+    return dict(row)
