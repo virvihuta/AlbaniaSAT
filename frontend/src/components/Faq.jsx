@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { getJSON } from '../api'
+import { useLanguage } from '../i18n'
 
 // Used until the FAQ endpoint exists in the backend, or if it cannot be reached
 const fallback = [
@@ -28,6 +29,7 @@ const fallback = [
 // FAQ section of the contact page. The questions come from the admin area (GET /faqs).
 // Only one answer is open at a time. Without questions the whole section is hidden.
 export default function Faq() {
+  const { t } = useLanguage()
   const [questions, setQuestions] = useState(null)
   const [open, setOpen] = useState(0)
 
@@ -43,8 +45,8 @@ export default function Faq() {
     <section className="mt-24 grid gap-10 lg:grid-cols-3">
       <div>
         <p className="eyebrow">FAQ</p>
-        <h2 className="mt-3 text-4xl">Questions</h2>
-        <p className="mt-4 text-muted">Something missing? Write to the team through the contact form.</p>
+        <h2 className="mt-3 text-4xl">{t('faq.title')}</h2>
+        <p className="mt-4 text-muted">{t('faq.text')}</p>
       </div>
 
       <div className="border-t border-border lg:col-span-2">
