@@ -4,17 +4,26 @@ import { adminRequest } from '../api'
 import AdminLayout from '../components/AdminLayout'
 import { Field, SubmitButton, ErrorText } from '../components/Form'
 import { categories } from '../categories'
+import { useLanguage } from '../i18n'
 
 const empty = { title: '', slug: '', summary: '', content: '', image_url: '', category: '', status: 'draft' }
 
-// "My New Article!" -> "my-new-article", used for the address of the article
+// "Farming in Korçë!" -> "farming-in-korce", used for the address of the article.
+// normalize('NFD') splits "ë" into "e" + dots and "ç" into "c" + hook, then we remove the dots and hooks.
 function toSlug(text) {
-  return text.toLowerCase().trim().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')
+  return text
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-|-$/g, '')
 }
 
 // One form for both: new article (/admin/articles/new) and edit (/admin/articles/5)
 export default function ArticleForm() {
   const { id } = useParams()
+  const { t } = useLanguage()
   const isNew = id === 'new'
   const navigate = useNavigate()
   const [form, setForm] = useState(empty)
@@ -55,41 +64,41 @@ export default function ArticleForm() {
 
   return (
     <AdminLayout>
-      <Link to="/admin" className="text-sm font-semibold text-primary hover:underline">← All articles</Link>
-      <h1 className="mt-4 text-3xl">{isNew ? 'New article' : 'Edit article'}</h1>
+      <Link to="/admin" className="text-sm font-semibold text-primary hover:underline">{t('article.back')}</Link>
+      <h1 className="mt-4 text-3xl">{isNew ? t('article.newTitle') : t('article.editTitle')}</h1>
 
       <form onSubmit={handleSubmit} className="mt-8 max-w-2xl">
-        <Field label="Title" name="title" value={form.title} onChange={handleChange} />
-        <Field label="Slug (address: /news/...)" name="slug" value={form.slug} onChange={handleChange} />
-        <Field label="Image URL (optional)" name="image_url" value={form.image_url} onChange={handleChange} required={false} />
+        <Field label={t('article.title')} name="title" value={form.title} onChange={handleChange} />
+        <Field label={t('article.slug')} name="slug" value={form.slug} onChange={handleChange} />
+        <Field label={t('article.image')} name="image_url" value={form.image_url} onChange={handleChange} required={false} />
 
         <label className="mb-4 block">
-          <span className="mb-1 block text-sm font-medium">Summary (optional)</span>
+          <span className="mb-1 block text-sm font-medium">{t('article.summary')}</span>
           <textarea name="summary" rows={2} value={form.summary} onChange={handleChange} className={boxClass} />
         </label>
         <label className="mb-4 block">
-          <span className="mb-1 block text-sm font-medium">Content</span>
+          <span className="mb-1 block text-sm font-medium">{t('article.content')}</span>
           <textarea name="content" rows={10} value={form.content} onChange={handleChange} className={boxClass} required />
         </label>
         <label className="mb-4 block">
-          <span className="mb-1 block text-sm font-medium">Topic</span>
+          <span className="mb-1 block text-sm font-medium">{t('article.topic')}</span>
           <select name="category" value={form.category} onChange={handleChange} className={boxClass}>
-            <option value="">No topic</option>
+            <option value="">{t('article.noTopic')}</option>
             {categories.map((c) => (
-              <option key={c.code} value={c.code}>{c.name}</option>
+              <option key={c.code} value={c.code}>{t('category.' + c.code)}</option>
             ))}
           </select>
         </label>
         <label className="mb-4 block">
-          <span className="mb-1 block text-sm font-medium">Status</span>
+          <span className="mb-1 block text-sm font-medium">{t('article.status')}</span>
           <select name="status" value={form.status} onChange={handleChange} className={boxClass}>
-            <option value="draft">Draft (only visible here)</option>
-            <option value="published">Published (visible on the news page)</option>
+            <option value="draft">{t('article.draft')}</option>
+            <option value="published">{t('article.published')}</option>
           </select>
         </label>
 
         <ErrorText error={error} />
-        <SubmitButton loading={loading}>{loading ? 'Saving...' : 'Save article'}</SubmitButton>
+        <SubmitButton loading={loading}>{loading ? t('article.saving') : t('article.save')}</SubmitButton>
       </form>
     </AdminLayout>
   )
