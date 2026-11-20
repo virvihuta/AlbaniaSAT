@@ -36,6 +36,17 @@
 }
 
 @layer base {
+  /* Hand cursor on everything you can click (Tailwind v4 removed it for buttons) */
+  button:not(:disabled),
+  [role='button'],
+  select,
+  label[for],
+  input[type='checkbox'] {
+    cursor: pointer;
+  }
+  button:disabled {
+    cursor: not-allowed;
+  }
   body {
     @apply bg-background text-foreground;
   }
