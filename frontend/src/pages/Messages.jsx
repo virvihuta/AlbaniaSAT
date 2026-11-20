@@ -3,17 +3,21 @@ import { adminRequest, formatDate } from '../api'
 import AdminLayout from '../components/AdminLayout'
 import Pagination from '../components/Pagination'
 import YearFilter from '../components/YearFilter'
+import { useLanguage } from '../i18n'
 
 const PAGE_SIZE = 20
 
-// "November 2026" for the month headings
-function monthName(value) {
-  return new Date(value).toLocaleDateString('en-GB', { month: 'long', year: 'numeric' })
+const locales = { en: 'en-GB', sq: 'sq-AL', de: 'de-DE' }
+
+// "November 2026" for the month headings, in the chosen language
+function monthName(value, lang) {
+  return new Date(value).toLocaleDateString(locales[lang] || 'en-GB', { month: 'long', year: 'numeric' })
 }
 
 // Private page (admins only): contact messages, newest first, by year, month and page.
 // New messages are marked with a red dot until someone marks them as read.
 export default function Messages() {
+  const { lang, t } = useLanguage()
   const [data, setData] = useState({ items: [], total: 0 })
   const [years, setYears] = useState([])
   const [year, setYear] = useState('')
@@ -53,21 +57,21 @@ export default function Messages() {
     <AdminLayout>
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
-          <h1 className="text-3xl">Messages</h1>
-          <p className="mt-1 text-sm text-muted">{data.total} messages from the contact form</p>
+          <h1 className="text-3xl">{t('admin.messages')}</h1>
+          <p className="mt-1 text-sm text-muted">{t('messages.count', { count: data.total })}</p>
         </div>
         <YearFilter years={years} value={year} onChange={chooseYear} />
       </div>
 
       {error && <p className="mt-6 text-primary">{error}</p>}
-      {loading && <p className="mt-6 text-muted">Loading...</p>}
-      {!loading && !error && data.total === 0 && <p className="mt-6 text-muted">No messages yet.</p>}
+      {loading && <p className="mt-6 text-muted">{t('common.loading')}</p>}
+      {!loading && !error && data.total === 0 && <p className="mt-6 text-muted">{t('messages.none')}</p>}
 
       <div className="mt-6 space-y-4">
         {data.items.map((m, i) => {
           // Show a month heading when the month changes
-          const month = monthName(m.created_at)
-          const newMonth = i === 0 || month !== monthName(data.items[i - 1].created_at)
+          const month = monthName(m.created_at, lang)
+          const newMonth = i === 0 || month !== monthName(data.items[i - 1].created_at, lang)
           // Only messages the API marks as unread get the red dot (no is_read from the API = no dot)
           const unread = m.is_read != null && !m.is_read
           return (
@@ -80,15 +84,15 @@ export default function Messages() {
               >
                 <div className="flex flex-wrap items-center justify-between gap-2">
                   <p className="flex items-center gap-2">
-                    {unread && <span className="h-2 w-2 rounded-full bg-primary" aria-label="Unread" />}
+                    {unread && <span className="h-2 w-2 rounded-full bg-primary" aria-label={t('messages.unread')} />}
                     <span className={unread ? 'font-bold' : 'font-medium'}>{m.name}</span>
                     <a href={`mailto:${m.email}`} className="text-primary hover:underline">{m.email}</a>
                   </p>
                   <div className="flex items-center gap-4 text-sm">
-                    <span className="text-muted">{formatDate(m.created_at)}</span>
+                    <span className="text-muted">{formatDate(m.created_at, lang)}</span>
                     {m.is_read != null && (
                       <button onClick={() => toggleRead(m)} className="font-medium text-muted hover:text-primary">
-                        {unread ? 'Mark as read' : 'Mark as unread'}
+                        {unread ? t('messages.markRead') : t('messages.markUnread')}
                       </button>
                     )}
                   </div>
