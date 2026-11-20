@@ -18,9 +18,12 @@ export async function postJSON(path, body) {
   return res.json().catch(() => ({}))
 }
 
-// Turns "2026-10-24T14:00:00Z" into "24 Oct 2026"
-export function formatDate(value) {
-  return value ? new Date(value).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) : ''
+// Date format of each language of the website
+const locales = { en: 'en-GB', sq: 'sq-AL', de: 'de-DE' }
+
+// Turns "2026-10-24T14:00:00Z" into "24 Oct 2026" (or the same date in Albanian or German)
+export function formatDate(value, lang = 'en') {
+  return value ? new Date(value).toLocaleDateString(locales[lang] || 'en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) : ''
 }
 
 // Like getJSON, but sends the login token. Used in the admin area.

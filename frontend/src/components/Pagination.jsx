@@ -1,3 +1,5 @@
+import { useLanguage } from '../i18n'
+
 // Page numbers to show, for example 1 … 4 5 6 … 12
 function pageList(page, totalPages) {
   const pages = []
@@ -10,18 +12,19 @@ function pageList(page, totalPages) {
 
 // Buttons to move between pages: Previous, page numbers, Next
 export default function Pagination({ page, totalPages, onChange }) {
+  const { t } = useLanguage()
   if (totalPages <= 1) return null
 
   const button = 'flex h-10 min-w-10 items-center justify-center rounded-lg px-3 text-sm font-medium '
 
   return (
-    <nav aria-label="Pages" className="mt-12 flex flex-wrap items-center justify-center gap-1">
+    <nav aria-label={t('pagination.label')} className="mt-12 flex flex-wrap items-center justify-center gap-1">
       <button
         onClick={() => onChange(page - 1)}
         disabled={page === 1}
         className={button + 'text-muted hover:text-foreground disabled:opacity-30'}
       >
-        ← Previous
+        {t('pagination.previous')}
       </button>
 
       {pageList(page, totalPages).map((p, i) =>
@@ -44,7 +47,7 @@ export default function Pagination({ page, totalPages, onChange }) {
         disabled={page === totalPages}
         className={button + 'text-muted hover:text-foreground disabled:opacity-30'}
       >
-        Next →
+        {t('pagination.next')}
       </button>
     </nav>
   )

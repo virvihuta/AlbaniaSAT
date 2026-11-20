@@ -1,6 +1,9 @@
+import { useLanguage } from '../i18n'
+
 // Round buttons to filter by year: All, 2026 (12), 2025 (5) ...
 // years comes from the API: [{ year: 2026, count: 12 }, ...]. value is the chosen year ('' = all).
 export default function YearFilter({ years, value, onChange }) {
+  const { t } = useLanguage()
   if (years.length === 0) return null
 
   return (
@@ -14,7 +17,7 @@ export default function YearFilter({ years, value, onChange }) {
             (String(y.year) === value ? 'border-primary bg-primary text-white' : 'border-border bg-surface hover:border-primary')
           }
         >
-          {y.year || 'All'}
+          {y.year || t('year.all')}
           {y.count !== null && <span className="ml-1 opacity-70">({y.count})</span>}
         </button>
       ))}

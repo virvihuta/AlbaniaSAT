@@ -1,4 +1,5 @@
 import { formatDate } from '../api'
+import { useLanguage } from '../i18n'
 
 // Article image. Without an image we show stripes in the land cover colors.
 export function Cover({ article, className = '' }) {
@@ -14,7 +15,8 @@ export function Cover({ article, className = '' }) {
 
 // Round badge with initials, then author name and date
 export function Author({ article }) {
-  const name = article.author || 'AlbaniaSAT Team'
+  const { lang, t } = useLanguage()
+  const name = article.author || t('author.team')
   const initials = name.split(' ').map((part) => part[0]).join('').slice(0, 2)
 
   return (
@@ -24,7 +26,7 @@ export function Author({ article }) {
       </span>
       <div className="text-sm">
         <p className="font-semibold">{name}</p>
-        <p className="text-muted">{formatDate(article.published_at)}</p>
+        <p className="text-muted">{formatDate(article.published_at, lang)}</p>
       </div>
     </div>
   )
