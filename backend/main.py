@@ -39,6 +39,6 @@ app.include_router(faqs_router)
 app.include_router(metrics_router)
 
 
-@app.get("/")
+@app.api_route("/", methods=["GET", "HEAD"])
 def health():
     return {"status": "ok"}

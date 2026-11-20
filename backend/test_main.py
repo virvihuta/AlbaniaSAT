@@ -20,3 +20,8 @@ def test_cors_allows_local_frontend():
 def test_cors_blocks_unknown_website():
     r = client.get("/", headers={"Origin": "https://unknown-website.example"})
     assert "access-control-allow-origin" not in r.headers
+
+
+def test_health_head():
+    response = client.head("/")
+    assert response.status_code == 200
