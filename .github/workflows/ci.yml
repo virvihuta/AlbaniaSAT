@@ -1,4 +1,4 @@
-# Checks the backend automatically on every push to main and on every pull request
+# Checks the backend and the frontend automatically on every push to main and on every pull request
 name: CI
 
 on:
@@ -40,3 +40,24 @@ jobs:
 
       - name: Build Docker image
         run: docker build -t albaniasat-api backend
+
+  # Checks that the website can be built (only the build, no lint for now)
+  frontend:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out the code
+        uses: actions/checkout@v5
+
+      - name: Set up Node 22
+        uses: actions/setup-node@v5
+        with:
+          node-version: "22"
+
+      - name: Install packages
+        working-directory: frontend
+        run: npm install
+
+      - name: Build the frontend
+        working-directory: frontend
+        run: npm run build
