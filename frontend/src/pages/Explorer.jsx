@@ -2,7 +2,8 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { getJSON } from '../api'
 import PublicLayout from '../components/PublicLayout'
 import AlbaniaMap from '../components/AlbaniaMap'
-import { landCoverClasses } from '../landCover'
+import { landCoverClasses, className } from '../landCover'
+import { useLanguage } from '../i18n'
 
 // Reads a color from index.css, e.g. "var(--color-lc-water)" -> "#2b7fd4" (Leaflet needs real colors)
 function realColor(cssVar) {
@@ -10,8 +11,10 @@ function realColor(cssVar) {
   return getComputedStyle(document.documentElement).getPropertyValue(name).trim() || '#999999'
 }
 
-function seconds(ms) {
-  return (ms / 1000).toFixed(1).replace('.0', '') + ' s'
+// 820 -> "0.8 s" in English, "0,8 s" in Albanian and German
+function seconds(ms, lang) {
+  const text = (ms / 1000).toFixed(1).replace('.0', '') + ' s'
+  return lang === 'en' ? text : text.replace('.', ',')
 }
 
 function percent(value) {
@@ -20,6 +23,7 @@ function percent(value) {
 
 // Public map page: click a region to load its patches, click a patch to see the image and the prediction
 export default function Explorer() {
+  const { lang, t } = useLanguage()
   const [regions, setRegions] = useState(null)
   const [classIds, setClassIds] = useState({}) // database id -> class code, from GET /classes
   const [years, setYears] = useState([])
@@ -36,7 +40,7 @@ export default function Explorer() {
 
   // Regions, classes and years are loaded once
   useEffect(() => {
-    getJSON('/regions/geojson').then(setRegions).catch(() => setError('The map data could not be loaded. Please try again in a minute.'))
+    getJSON('/regions/geojson').then(setRegions).catch(() => setError('explorer.mapError'))
     getJSON('/classes')
       .then((list) => setClassIds(Object.fromEntries(list.map((c) => [c.id, c.code]))))
       .catch(() => setClassIds({}))
@@ -84,7 +88,7 @@ export default function Explorer() {
         setSummary(summaryData)
         setLoadTime({ ms, cached: false })
       })
-      .catch(() => !cancelled && setError('The patches could not be loaded.'))
+      .catch(() => !cancelled && setError('explorer.patchError'))
       .finally(() => !cancelled && setLoading(false))
 
     return () => {
@@ -152,17 +156,17 @@ export default function Explorer() {
               onChange={(e) => selectRegion(e.target.value ? Number(e.target.value) : null)}
               className="rounded-lg border border-border bg-surface px-4 py-2.5 text-sm font-medium shadow-sm outline-none focus:border-primary"
             >
-              <option value="">All of Albania</option>
+              <option value="">{t('explorer.allAlbania')}</option>
               {regionNames.map((r) => (
                 <option key={r.id} value={r.id}>{r.name}</option>
               ))}
             </select>
 
             <div className="hidden rounded-xl border border-border bg-surface p-4 shadow-sm sm:block">
-              <p className="eyebrow mb-3">Land cover{year ? ' ' + year : ''}</p>
+              <p className="eyebrow mb-3">{t('explorer.landCover')}{year ? ' ' + year : ''}</p>
               {landCoverClasses.map((c) => (
                 <p key={c.code} className="mb-1.5 flex items-center gap-2 text-sm">
-                  <span className="h-3 w-3 rounded-sm" style={{ backgroundColor: c.color }} /> {c.name}
+                  <span className="h-3 w-3 rounded-sm" style={{ backgroundColor: c.color }} /> {className(c, lang)}
                 </p>
               ))}
             </div>
@@ -170,7 +174,7 @@ export default function Explorer() {
 
           {years.length > 0 && (
             <div className="absolute bottom-6 left-4 z-[1000] flex items-center gap-2 rounded-xl border border-border bg-surface p-2 shadow-sm">
-              <span className="px-2 text-xs font-semibold uppercase tracking-wider text-muted">Year</span>
+              <span className="px-2 text-xs font-semibold uppercase tracking-wider text-muted">{t('explorer.year')}</span>
               {years.map((y) => (
                 <button
                   key={y}
@@ -186,43 +190,42 @@ export default function Explorer() {
 
         {/* Panel on the right: what is selected */}
         <aside className="w-full overflow-y-auto border-l border-border bg-surface p-8 lg:w-[26rem]">
-          {error && <p className="mb-6 text-sm text-primary">{error}</p>}
+          {error && <p className="mb-6 text-sm text-primary">{t(error)}</p>}
 
           {!regionId && (
             <>
-              <p className="eyebrow">Explorer</p>
-              <h1 className="mt-3 text-4xl">Land cover of Albania</h1>
-              <p className="mt-4 text-muted">
-                Choose a region on the map or in the list. You will see the sample patches the model classified, each as a dot in the
-                color of its class.
-              </p>
-              <p className="mt-6 text-sm text-muted">Click a dot to see the Sentinel-2 image of that patch and what the model predicted.</p>
+              <p className="eyebrow">{t('nav.explorer')}</p>
+              <h1 className="mt-3 text-4xl">{t('explorer.introTitle')}</h1>
+              <p className="mt-4 text-muted">{t('explorer.introText')}</p>
+              <p className="mt-6 text-sm text-muted">{t('explorer.introHint')}</p>
             </>
           )}
 
           {regionId && !patch && (
             <>
-              <p className="eyebrow">Selected region</p>
+              <p className="eyebrow">{t('explorer.selected')}</p>
               <h1 className="mt-3 text-4xl">{regionName}</h1>
               <p className="mt-2 text-sm text-muted">
                 {year ? year + ' · ' : ''}
-                {loading ? 'Loading patches...' : `${patches?.features.length ?? 0} patches`}
+                {loading ? t('explorer.loadingPatches') : t('explorer.patches', { count: patches?.features.length ?? 0 })}
               </p>
               {loadTime && (
                 <p className="mt-1 text-xs text-muted">
-                  {loadTime.cached ? `From cache · first load took ${seconds(loadTime.ms)}` : `Loaded in ${seconds(loadTime.ms)}`}
+                  {loadTime.cached
+                    ? t('explorer.fromCache', { time: seconds(loadTime.ms, lang) })
+                    : t('explorer.loadedIn', { time: seconds(loadTime.ms, lang) })}
                 </p>
               )}
 
               {summary?.mean_confidence != null ? (
                 <div className="mt-6 rounded-xl bg-background p-4">
-                  <p className="text-xs uppercase tracking-wider text-muted">Average model confidence</p>
+                  <p className="text-xs uppercase tracking-wider text-muted">{t('explorer.avgConfidence')}</p>
                   <p className="mt-1 font-heading text-3xl font-light">{percent(summary.mean_confidence)}</p>
                 </div>
               ) : (
                 patchConfidence != null && (
                   <div className="mt-6 rounded-xl bg-background p-4">
-                    <p className="text-xs uppercase tracking-wider text-muted">Model confidence on the sample patches</p>
+                    <p className="text-xs uppercase tracking-wider text-muted">{t('explorer.sampleConfidence')}</p>
                     <p className="mt-1 font-heading text-3xl font-light">{percent(patchConfidence)}</p>
                   </div>
                 )
@@ -230,12 +233,12 @@ export default function Explorer() {
 
               {patches && patches.features.length > 0 && (
                 <div className="mt-8">
-                  <p className="eyebrow mb-4">Sample patches by class</p>
+                  <p className="eyebrow mb-4">{t('explorer.byClass')}</p>
                   {shares.map((c) => (
                     <div key={c.code} className="mb-3">
                       <div className="flex justify-between text-sm">
                         <span className="flex items-center gap-2">
-                          <span className="h-3 w-3 rounded-sm" style={{ backgroundColor: c.color }} /> {c.name}
+                          <span className="h-3 w-3 rounded-sm" style={{ backgroundColor: c.color }} /> {className(c, lang)}
                         </span>
                         <span className="text-muted">{c.count}</span>
                       </div>
@@ -244,22 +247,19 @@ export default function Explorer() {
                       </div>
                     </div>
                   ))}
-                  <p className="mt-4 text-xs text-muted">
-                    The dataset has about the same number of patches for every class, so these numbers do not show the real land
-                    cover of the region. The full map of the region follows.
-                  </p>
+                  <p className="mt-4 text-xs text-muted">{t('explorer.balancedNote')}</p>
                 </div>
               )}
 
               {summary?.ai_summary && (
                 <div className="mt-8 rounded-xl bg-background p-4">
-                  <p className="eyebrow">Summary · generated from the data</p>
+                  <p className="eyebrow">{t('explorer.summary')}</p>
                   <p className="mt-2 text-sm">{summary.ai_summary}</p>
                 </div>
               )}
 
               <button onClick={() => selectRegion(null)} className="mt-8 text-sm font-semibold text-primary hover:underline">
-                ← All of Albania
+                {t('explorer.backAll')}
               </button>
             </>
           )}
@@ -269,11 +269,11 @@ export default function Explorer() {
               <button onClick={() => setPatchId(null)} className="text-sm font-semibold text-primary hover:underline">
                 ← {regionName}
               </button>
-              <p className="eyebrow mt-6">Patch {patch.id} · {patch.year}</p>
+              <p className="eyebrow mt-6">{t('explorer.patch', { id: patch.id, year: patch.year })}</p>
               {patch.image_url && (
                 <img
                   src={patch.image_url}
-                  alt="Sentinel-2 image of this patch"
+                  alt={t('explorer.imageAlt')}
                   className="mt-4 aspect-square w-full rounded-xl bg-background object-cover [image-rendering:pixelated]"
                 />
               )}
@@ -281,27 +281,27 @@ export default function Explorer() {
 
               <dl className="mt-6 divide-y divide-border border-y border-border text-sm">
                 <div className="flex justify-between py-3">
-                  <dt className="text-muted">Model prediction</dt>
+                  <dt className="text-muted">{t('explorer.prediction')}</dt>
                   <dd className="flex items-center gap-2 font-semibold">
                     <span className="h-3 w-3 rounded-sm" style={{ backgroundColor: classOf(patch.predicted_class_id)?.color }} />
-                    {classOf(patch.predicted_class_id)?.name || 'No prediction'}
+                    {classOf(patch.predicted_class_id) ? className(classOf(patch.predicted_class_id), lang) : t('explorer.noPrediction')}
                   </dd>
                 </div>
                 <div className="flex justify-between py-3">
-                  <dt className="text-muted">Model confidence</dt>
+                  <dt className="text-muted">{t('explorer.confidence')}</dt>
                   <dd className="font-semibold">{percent(patch.confidence)}</dd>
                 </div>
                 {patch.model_version && (
                   <div className="flex justify-between py-3">
-                    <dt className="text-muted">Model version</dt>
+                    <dt className="text-muted">{t('explorer.version')}</dt>
                     <dd className="font-semibold">{patch.model_version}</dd>
                   </div>
                 )}
                 <div className="flex justify-between py-3">
-                  <dt className="text-muted">Reference label</dt>
+                  <dt className="text-muted">{t('explorer.reference')}</dt>
                   <dd className="flex items-center gap-2">
                     <span className="h-3 w-3 rounded-sm" style={{ backgroundColor: classOf(patch.reference_class_id)?.color }} />
-                    {classOf(patch.reference_class_id)?.name || 'None'}
+                    {classOf(patch.reference_class_id) ? className(classOf(patch.reference_class_id), lang) : t('explorer.none')}
                   </dd>
                 </div>
               </dl>
@@ -309,8 +309,8 @@ export default function Explorer() {
               {patch.reference_class_id != null && patch.predicted_class_id != null && (
                 <p className={'mt-4 text-sm ' + (patch.reference_class_id === patch.predicted_class_id ? 'text-lc-broadleaf' : 'text-primary')}>
                   {patch.reference_class_id === patch.predicted_class_id
-                    ? 'The prediction matches the reference label.'
-                    : 'The prediction differs from the reference label.'}
+                    ? t('explorer.match')
+                    : t('explorer.mismatch')}
                 </p>
               )}
             </>
