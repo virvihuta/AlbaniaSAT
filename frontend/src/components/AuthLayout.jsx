@@ -1,13 +1,17 @@
 import Contours from './Contours'
+import LanguageToggle from './LanguageToggle'
+import { useLanguage } from '../i18n'
 
 const facts = [
-  { value: '7', label: 'Land cover classes' },
-  { value: '10 m', label: 'Resolution' },
-  { value: '80.94 %', label: 'Accuracy' },
+  { value: '7', label: 'login.factClasses' },
+  { value: '10 m', label: 'login.factResolution' },
+  { value: '80.94 %', label: 'login.factAccuracy' },
 ]
 
-// The page for Login and Register: dark picture on the left, form on the right
+// The login page: dark picture on the left, form on the right
 export default function AuthLayout({ title, subtitle, children }) {
+  const { t } = useLanguage()
+
   return (
     <div className="flex min-h-screen">
       {/* Left half (hidden on phones) */}
@@ -24,12 +28,12 @@ export default function AuthLayout({ title, subtitle, children }) {
           </div>
 
           <div>
-            <h2 className="max-w-md text-5xl leading-tight">Europe couldn't see Albania. Now it can.</h2>
+            <h2 className="max-w-md text-5xl leading-tight">{t('tagline')}</h2>
             <div className="mt-10 flex gap-10">
               {facts.map((fact) => (
                 <div key={fact.label}>
                   <p className="text-2xl font-bold">{fact.value}</p>
-                  <p className="text-xs uppercase tracking-wider text-white/60">{fact.label}</p>
+                  <p className="text-xs uppercase tracking-wider text-white/60">{t(fact.label)}</p>
                 </div>
               ))}
             </div>
@@ -37,8 +41,11 @@ export default function AuthLayout({ title, subtitle, children }) {
         </div>
       </div>
 
-      {/* Right half: the form */}
-      <div className="flex w-full items-center justify-center px-6 md:w-1/2">
+      {/* Right half: the form, with the language switch in the corner */}
+      <div className="relative flex w-full items-center justify-center px-6 md:w-1/2">
+        <div className="absolute right-6 top-6">
+          <LanguageToggle />
+        </div>
         <div className="w-full max-w-md">
           <img src="/logo.png" alt="AlbaniaSAT" className="mb-8 h-14 w-auto md:hidden" />
           <h1 className="text-3xl">{title}</h1>

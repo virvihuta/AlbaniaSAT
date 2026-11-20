@@ -2,11 +2,14 @@ import { useEffect, useState } from 'react'
 import { NavLink } from 'react-router-dom'
 import { adminRequest } from '../api'
 import { useAuth } from '../auth'
+import { useLanguage } from '../i18n'
 import Logo from './Logo'
+import LanguageToggle from './LanguageToggle'
 
-// Header for the private area: user name and logout
+// Header for the private area: menu, language, user name and logout
 export default function AdminLayout({ children }) {
   const { user, logout } = useAuth()
+  const { t } = useLanguage()
   const [unread, setUnread] = useState(0)
 
   // Number of unread messages for the badge (admins only). Updates when a message is marked.
@@ -23,10 +26,10 @@ export default function AdminLayout({ children }) {
 
   // Editors see articles and FAQ. Messages have personal data, so only admins see them.
   const links = [
-    { to: '/admin', label: 'Articles' },
-    { to: '/admin/faqs', label: 'FAQ' },
+    { to: '/admin', label: 'admin.articles' },
+    { to: '/admin/faqs', label: 'admin.faq' },
   ]
-  if (user.role === 'admin') links.push({ to: '/admin/messages', label: 'Messages' })
+  if (user.role === 'admin') links.push({ to: '/admin/messages', label: 'admin.messages' })
 
   return (
     <div className="min-h-screen">
@@ -34,13 +37,13 @@ export default function AdminLayout({ children }) {
         <div className="flex items-center gap-3">
           <Logo to="/admin" big />
           <span className="rounded-full bg-primary px-2.5 py-0.5 text-xs font-semibold text-white">
-            {user.role === 'admin' ? 'Admin' : 'Editor'}
+            {user.role === 'admin' ? t('admin.roleAdmin') : t('admin.roleEditor')}
           </span>
           <nav className="ml-6 flex gap-5 text-sm font-medium">
             {links.map((link) => (
               <NavLink key={link.to} to={link.to} end
                 className={({ isActive }) => (isActive ? 'text-primary' : 'text-muted hover:text-foreground')}>
-                {link.label}
+                {t(link.label)}
                 {link.to === '/admin/messages' && unread > 0 && (
                   <span className="ml-1.5 rounded-full bg-primary px-1.5 py-0.5 text-xs font-semibold text-white">{unread}</span>
                 )}
@@ -49,12 +52,13 @@ export default function AdminLayout({ children }) {
           </nav>
         </div>
         <div className="flex items-center gap-4">
+          <LanguageToggle />
           <span className="text-sm text-muted">{user.name}</span>
           <button
             onClick={logout}
             className="rounded-lg border border-border px-4 py-2 text-sm font-semibold hover:border-primary hover:text-primary"
           >
-            Logout
+            {t('admin.logout')}
           </button>
         </div>
       </header>

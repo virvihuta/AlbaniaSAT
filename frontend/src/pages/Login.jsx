@@ -3,11 +3,13 @@ import { Navigate, useNavigate } from 'react-router-dom'
 import { useAuth } from '../auth'
 import AuthLayout from '../components/AuthLayout'
 import { Field, SubmitButton, ErrorText } from '../components/Form'
+import { useLanguage } from '../i18n'
 
 // Login for the private area (admins and editors only)
 export default function Login() {
   const navigate = useNavigate()
   const { user, login } = useAuth()
+  const { t } = useLanguage()
   const [form, setForm] = useState({ email: '', password: '' })
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
@@ -34,13 +36,13 @@ export default function Login() {
   }
 
   return (
-    <AuthLayout title="Admin login" subtitle="Only for the AlbaniaSAT team">
+    <AuthLayout title={t('login.title')} subtitle={t('login.subtitle')}>
       <form onSubmit={handleSubmit}>
-        <Field label="Email" name="email" type="email" value={form.email} onChange={handleChange} />
-        <Field label="Password" name="password" type="password" value={form.password} onChange={handleChange} />
+        <Field label={t('login.email')} name="email" type="email" value={form.email} onChange={handleChange} />
+        <Field label={t('login.password')} name="password" type="password" value={form.password} onChange={handleChange} />
 
         <ErrorText error={error} />
-        <SubmitButton loading={loading}>{loading ? 'Signing in...' : 'Sign in'}</SubmitButton>
+        <SubmitButton loading={loading}>{loading ? t('login.signingIn') : t('login.signIn')}</SubmitButton>
       </form>
     </AuthLayout>
   )
