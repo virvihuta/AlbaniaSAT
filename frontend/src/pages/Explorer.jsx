@@ -32,6 +32,7 @@ export default function Explorer() {
   const [patches, setPatches] = useState(null)
   const [summary, setSummary] = useState(null)
   const [patchId, setPatchId] = useState(null)
+  const [patchDetail, setPatchDetail] = useState(null) // one patch from GET /patches/{id}, with the class probabilities
   const [loading, setLoading] = useState(false)
   const [loadTime, setLoadTime] = useState(null) // { ms, cached } of the last region load
   const [error, setError] = useState('')
@@ -96,6 +97,28 @@ export default function Explorer() {
     }
   }, [regionId, year])
 
+  // Details of the clicked patch (probabilities of all classes). Each patch is loaded only once.
+  const detailCache = useRef(new Map())
+  useEffect(() => {
+    setPatchDetail(null)
+    if (!patchId) return
+    const saved = detailCache.current.get(patchId)
+    if (saved) {
+      setPatchDetail(saved)
+      return
+    }
+    let cancelled = false
+    getJSON('/patches/' + patchId)
+      .then((data) => {
+        detailCache.current.set(patchId, data)
+        if (!cancelled) setPatchDetail(data)
+      })
+      .catch(() => {})
+    return () => {
+      cancelled = true
+    }
+  }, [patchId])
+
   // Class of a prediction: database id -> code -> our class with name and color
   const classOf = useCallback(
     (id) => landCoverClasses.find((c) => c.code === classIds[id]) || null,
@@ -134,6 +157,15 @@ export default function Explorer() {
   }, [patches])
 
   const patch = patches?.features.find((f) => f.properties.id === patchId)?.properties
+
+  // Probabilities of the clicked patch, highest first: [{ class, value }, ...]
+  const probabilities = useMemo(() => {
+    if (!patchDetail?.probabilities) return []
+    return Object.entries(patchDetail.probabilities)
+      .map(([id, value]) => ({ landCover: classOf(Number(id)), value }))
+      .filter((p) => p.landCover)
+      .sort((a, b) => b.value - a.value)
+  }, [patchDetail, classOf])
 
   return (
     <PublicLayout full>
@@ -312,6 +344,25 @@ export default function Explorer() {
                     ? t('explorer.match')
                     : t('explorer.mismatch')}
                 </p>
+              )}
+
+              {probabilities.length > 0 && (
+                <div className="mt-8">
+                  <p className="eyebrow mb-4">{t('explorer.probabilities')}</p>
+                  {probabilities.map((p) => (
+                    <div key={p.landCover.code} className="mb-3">
+                      <div className="flex justify-between text-sm">
+                        <span className="flex items-center gap-2">
+                          <span className="h-3 w-3 rounded-sm" style={{ backgroundColor: p.landCover.color }} /> {className(p.landCover, lang)}
+                        </span>
+                        <span className="text-muted">{p.value < 0.005 ? '<1%' : percent(p.value)}</span>
+                      </div>
+                      <div className="mt-1.5 h-1.5 rounded-full bg-background">
+                        <div className="h-full rounded-full" style={{ width: p.value * 100 + '%', backgroundColor: p.landCover.color }} />
+                      </div>
+                    </div>
+                  ))}
+                </div>
               )}
             </>
           )}
