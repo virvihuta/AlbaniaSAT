@@ -1,10 +1,10 @@
-# Tests für die Endpoints in classification.py und ingest.py (Regis)
-# Starten im Ordner backend: pytest -v
+# Tests for the endpoints in classification.py and ingest.py (Regis)
+# Run from the backend folder: pytest -v
 from fastapi.testclient import TestClient
 
 from main import app
 
-# Ein "Fake-Browser", der Anfragen an unsere App schickt
+	# A "fake browser" that sends requests to our app
 client = TestClient(app)
 
 

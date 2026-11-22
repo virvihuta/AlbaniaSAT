@@ -1,4 +1,4 @@
-# Endpoints für das Kontaktformular der Website (Regis)
+# Endpoints for the contact form of the website (Regis)
 
 from fastapi import APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel, Field
@@ -7,37 +7,37 @@ from sqlalchemy import text
 from db import engine
 from security import require_role
 
-# Router: eine Gruppe von Endpoints
+# Router: a group of endpoints
 router = APIRouter(tags=["Contact"])
 
-# Nur der Admin darf die Nachrichten lesen
+# Only the admin may read the messages
 admin_only = require_role("admin")
 
-# Gleicher Filter für die Liste und für das Zählen (ohne year: alle Jahre)
+# Same filter for the list and for counting (without year: all years)
 YEAR_FILTER = "WHERE (:year IS NULL OR EXTRACT(YEAR FROM created_at) = :year)"
 
 
-# Diese Daten schickt das Formular
-class Kontakt(BaseModel):
+# The data the form sends
+class ContactData(BaseModel):
     name: str = Field(min_length=2, max_length=100)
     email: str = Field(pattern=r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
     message: str = Field(min_length=10, max_length=2000)
 
 
-# Diese Daten schickt der Admin, wenn er eine Nachricht als gelesen markiert
-class Gelesen(BaseModel):
+# The data the admin sends to mark a message as read
+class ReadStatus(BaseModel):
     is_read: bool
 
 
 @router.post("/contact", status_code=201)
-def send_contact(data: Kontakt):
-    """Speichert eine Nachricht aus dem Kontaktformular (öffentlich)."""
+def send_contact(data: ContactData):
+    """Saves a message from the contact form (public)."""
     with engine.begin() as db:
         db.execute(text("""
                 INSERT INTO contact_messages (name, email, message)
                 VALUES (:name, :email, :message)
             """), data.model_dump())
-    return {"status": "gesendet"}
+    return {"status": "sent"}
 
 
 @router.get("/admin/contact")
@@ -47,7 +47,7 @@ def list_contact_messages(
     page_size: int = Query(20, ge=1, le=100),
     user=Depends(admin_only),
 ):
-    """Kontaktnachrichten Seite für Seite, die neuesten zuerst (nur admin). Optional ?year=2026."""
+    """Contact messages page by page, newest first (admin only). Optional ?year=2026."""
     with engine.connect() as db:
         total = db.execute(
             text(f"SELECT count(*) FROM contact_messages {YEAR_FILTER}"),
@@ -66,10 +66,10 @@ def list_contact_messages(
     return {"items": [dict(r) for r in rows], "total": total, "page": page, "page_size": page_size}
 
 
-# /years und /unread-count müssen vor /{message_id} stehen
+# /years and /unread-count must stay before /{message_id}
 @router.get("/admin/contact/years")
 def list_contact_years(user=Depends(admin_only)):
-    """Jahre mit Kontaktnachrichten und wie viele, neuestes Jahr zuerst (nur admin)."""
+    """Years with contact messages and how many, newest year first (admin only)."""
     with engine.connect() as db:
         rows = db.execute(text("""
             SELECT CAST(EXTRACT(YEAR FROM created_at) AS int) AS year, count(*) AS count
@@ -82,16 +82,16 @@ def list_contact_years(user=Depends(admin_only)):
 
 @router.get("/admin/contact/unread-count")
 def unread_count(user=Depends(admin_only)):
-    """Wie viele Nachrichten noch nicht gelesen sind (für die Zahl im Menü)."""
+    """How many messages are not read yet (for the number in the menu)."""
     with engine.connect() as db:
         count = db.execute(text("SELECT count(*) FROM contact_messages WHERE status = 'new'")).scalar()
     return {"count": count}
 
 
 @router.patch("/admin/contact/{message_id}")
-def mark_read(message_id: int, data: Gelesen, user=Depends(admin_only)):
-    """Nachricht als gelesen oder ungelesen markieren (nur admin)."""
-    # In der Datenbank heißt 'read' gelesen und 'new' ungelesen
+def mark_read(message_id: int, data: ReadStatus, user=Depends(admin_only)):
+    """Marks a message as read or unread (admin only)."""
+    # In the database 'read' means read and 'new' means unread
     new_status = "read" if data.is_read else "new"
     with engine.begin() as db:
         result = db.execute(
@@ -99,5 +99,5 @@ def mark_read(message_id: int, data: Gelesen, user=Depends(admin_only)):
             {"status": new_status, "id": message_id},
         )
     if result.rowcount == 0:
-        raise HTTPException(status_code=404, detail="Nachricht nicht gefunden")
+        raise HTTPException(status_code=404, detail="Message not found")
     return {"id": message_id, "is_read": data.is_read}

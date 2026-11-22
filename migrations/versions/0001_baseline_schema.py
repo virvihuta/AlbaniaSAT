@@ -9,32 +9,32 @@ from pathlib import Path
 from alembic import op
 
 # ---------------------------------------------------------------
-# Namen dieser Migration
+# Names of this migration
 # ---------------------------------------------------------------
-# Die Nummer dieser Migration
+# The number of this migration
 revision = "0001"
-# Die Nummer der Migration davor. Das ist die erste, also gibt es keine.
+# The number of the migration before. This is the first one, so there is none.
 down_revision = None
-# Diese zwei Zeilen brauchen wir nicht. Sie bleiben leer.
+# We do not need these two lines. They stay empty.
 branch_labels = None
 depends_on = None
 
 # ---------------------------------------------------------------
-# Wo liegt unser Schema?
+# Where is our schema?
 # ---------------------------------------------------------------
-# Die Datei migrations/sql/0001_schema.sql mit allen 11 Tabellen
-SQL_DATEI = Path(__file__).resolve().parent.parent / "sql" / "0001_schema.sql"
+# The file migrations/sql/0001_schema.sql with all 11 tables
+SQL_FILE = Path(__file__).resolve().parent.parent / "sql" / "0001_schema.sql"
 
 
 def upgrade():
-    # "upgrade" heißt: Die Datenbank bekommt etwas Neues.
-    # 1. Die SQL-Datei lesen
-    sql = SQL_DATEI.read_text(encoding="utf-8")
-    # 2. Das SQL in der Datenbank ausführen
+    # "upgrade" means: the database gets something new.
+    # 1. Read the SQL file
+    sql = SQL_FILE.read_text(encoding="utf-8")
+    # 2. Run the SQL in the database
     op.get_bind().exec_driver_sql(sql)
 
 
 def downgrade():
-    # "downgrade" heißt: Die Änderung zurücknehmen.
-    # Das geht hier nicht, sonst wären alle Tabellen und Daten weg.
-    raise NotImplementedError("Die erste Migration kann man nicht zurücknehmen.")
+    # "downgrade" means: take the change back.
+    # This is not possible here, otherwise all tables and data would be gone.
+    raise NotImplementedError("The first migration cannot be taken back.")

@@ -1,4 +1,4 @@
-# Virvi schickt hier ihre Ergebnisse (Regis)
+# Virvi sends her results here (Regis)
 import json
 import os
 
@@ -12,8 +12,8 @@ from db import engine
 router = APIRouter(tags=["Ingest"])
 
 
-# Diese Daten schickt Virvi
-class Ergebnis(BaseModel):
+# The data Virvi sends
+class ClassificationResult(BaseModel):
     region_id: int
     year: int
     model_version_id: int
@@ -21,21 +21,22 @@ class Ergebnis(BaseModel):
     dominant_class_id: int
     patch_count: int
     ai_summary: str = ""
-    # Wie sicher das Modell im Durchschnitt ist (0 bis 1). Freiwillig.
+    # How sure the model is on average (0 to 1). Optional.
     mean_confidence: float | None = Field(default=None, ge=0, le=1)
 
 
 @router.post("/ingest/classification", status_code=201)
-def ingest(data: Ergebnis, x_api_key: str = Header()):
-    # 1. Nur mit dem richtigen Schlüssel
+def ingest(data: ClassificationResult, x_api_key: str = Header()):
+    """Saves the classification result of one region and year (needs the ingest API key)."""
+    # 1. Only with the right key
     if x_api_key != os.environ["INGEST_API_KEY"]:
-        raise HTTPException(status_code=401, detail="Falscher Schlüssel")
+        raise HTTPException(status_code=401, detail="Wrong API key")
 
-    # 2. Daten vorbereiten (die Verteilung als JSON-Text)
-    werte = data.model_dump()
-    werte["class_distribution"] = json.dumps(data.class_distribution)
+    # 2. Prepare the data (the distribution as JSON text)
+    values = data.model_dump()
+    values["class_distribution"] = json.dumps(data.class_distribution)
 
-    # 3. In die Datenbank schreiben (neu einfügen oder altes Ergebnis ersetzen)
+    # 3. Write to the database (insert new or replace the old result)
     try:
         with engine.begin() as db:
             db.execute(
@@ -54,9 +55,9 @@ def ingest(data: Ergebnis, x_api_key: str = Header()):
                         mean_confidence = EXCLUDED.mean_confidence,
                         generated_at = now()
                 """),
-                werte,
+                values,
             )
     except IntegrityError:
-        raise HTTPException(status_code=400, detail="Falsche ID (Region, Modell oder Klasse gibt es nicht)") from None
+        raise HTTPException(status_code=400, detail="Wrong ID (region, model or class does not exist)") from None
 
-    return {"status": "gespeichert"}
+    return {"status": "saved"}

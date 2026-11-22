@@ -1,5 +1,5 @@
-# Tests für die Pagination in articles.py und admin_articles.py (Regis)
-# Diese Tests schreiben nichts in die Datenbank.
+# Tests for the pagination in articles.py and admin_articles.py (Regis)
+# These tests do not write anything to the database.
 from fastapi.testclient import TestClient
 
 from main import app
