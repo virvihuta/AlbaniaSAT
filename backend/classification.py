@@ -1,4 +1,4 @@
-# Endpoints für Regionen und Klassifikation (Regis)
+# Endpoints for regions and classification (Regis)
 import json
 
 from fastapi import APIRouter, HTTPException
@@ -6,13 +6,13 @@ from sqlalchemy import text
 
 from db import engine
 
-# Router: eine Gruppe von Endpoints
+# Router: a group of endpoints
 router = APIRouter(tags=["Regions and classification"])
 
 
 @router.get("/regions")
 def list_regions():
-    """Alle Regionen, sortiert nach Name (ohne Geometrie)."""
+    """All regions, sorted by name (without geometry)."""
     with engine.connect() as db:
         rows = db.execute(
             text("""
@@ -26,7 +26,7 @@ def list_regions():
 
 @router.get("/classification/{region_id}/{year}")
 def get_classification(region_id: int, year: int):
-    """Ergebnis der Klassifikation für eine Region in einem Jahr."""
+    """Classification result for one region in one year."""
     with engine.connect() as db:
         row = db.execute(
             text("""
@@ -45,13 +45,13 @@ def get_classification(region_id: int, year: int):
             {"region_id": region_id, "year": year},
         ).mappings().first()
     if not row:
-        raise HTTPException(status_code=404, detail="Keine Daten für diese Region und dieses Jahr")
+        raise HTTPException(status_code=404, detail="No data for this region and year")
     return dict(row)
 
 
 @router.get("/classes")
 def list_classes():
-    """Die 7 Klassen mit Code, Namen in 3 Sprachen und Farbe (für die Legende)."""
+    """The 7 classes with code, names in 3 languages and color (for the legend)."""
     with engine.connect() as db:
         rows = db.execute(
             text("""
@@ -75,17 +75,17 @@ def calculate_change(previous, current):
 
 @router.get("/classification/{region_id}")
 def get_classification_years(region_id: int):
-    """Alle Jahre einer Region, sortiert nach Jahr (für die Zeitreihe)."""
+    """All years of one region, sorted by year (for the time series)."""
     with engine.connect() as db:
-        # 1. Gibt es die Region?
+        # 1. Does the region exist?
         region = db.execute(
             text("SELECT id, name FROM regions WHERE id = :region_id"),
             {"region_id": region_id},
         ).mappings().first()
         if not region:
-            raise HTTPException(status_code=404, detail="Region nicht gefunden")
+            raise HTTPException(status_code=404, detail="Region not found")
 
-        # 2. Alle Jahre dieser Region holen (pro Jahr nur das neueste Ergebnis)
+        # 2. Get all years of this region (only the newest result per year)
         rows = db.execute(
             text("""
                 SELECT DISTINCT ON (year)
@@ -107,7 +107,7 @@ def get_classification_years(region_id: int):
         years.append(year)
         previous = year["class_distribution"]
 
-    # 4. Antwort: Region und Liste der Jahre
+    # 4. Answer: region and list of years
     return {
         "region_id": region["id"],
         "region_name": region["name"],
@@ -117,7 +117,7 @@ def get_classification_years(region_id: int):
 
 @router.get("/regions/geojson")
 def regions_geojson():
-    """Grenzen aller Regionen als GeoJSON (für die Karte)."""
+    """Borders of all regions as GeoJSON (for the map)."""
     with engine.connect() as db:
         rows = db.execute(
             text("""
@@ -127,7 +127,7 @@ def regions_geojson():
             """)
         ).mappings().all()
 
-    # Jede Region wird ein "Feature": Form + Informationen
+    # Each region becomes a "feature": shape + information
     features = []
     for r in rows:
         features.append({
@@ -136,13 +136,13 @@ def regions_geojson():
             "properties": {"id": r["id"], "name": r["name"], "code": r["code"]},
         })
 
-    # Alle Features zusammen sind eine "FeatureCollection"
+    # All features together are a "FeatureCollection"
     return {"type": "FeatureCollection", "features": features}
 
 
 @router.get("/years")
 def list_years():
-    """Alle Jahre, für die es Ergebnisse gibt (für den Jahr-Filter auf der Karte)."""
+    """All years that have results (for the year filter on the map)."""
     with engine.connect() as db:
         rows = db.execute(
             text("SELECT DISTINCT year FROM region_year_summaries ORDER BY year")
