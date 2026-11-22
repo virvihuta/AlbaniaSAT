@@ -9,7 +9,7 @@ from sqlalchemy.exc import IntegrityError
 
 from db import engine
 
-router = APIRouter()
+router = APIRouter(tags=["Ingest"])
 
 
 # Diese Daten schickt Virvi

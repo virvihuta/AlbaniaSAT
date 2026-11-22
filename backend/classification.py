@@ -7,7 +7,7 @@ from sqlalchemy import text
 from db import engine
 
 # Router: eine Gruppe von Endpoints
-router = APIRouter()
+router = APIRouter(tags=["Regions and classification"])
 
 
 @router.get("/regions")

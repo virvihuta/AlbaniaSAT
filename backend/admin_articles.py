@@ -11,7 +11,7 @@ from db import engine
 from security import require_role
 
 editor = require_role("admin", "redakteur")
-router = APIRouter(prefix="/admin/articles", dependencies=[Depends(editor)])
+router = APIRouter(prefix="/admin/articles", dependencies=[Depends(editor)], tags=["Admin: articles"])
 
 # Search in the title and optional status (published or draft)
 ADMIN_FILTER = "WHERE lower(title) LIKE :q AND (:status IS NULL OR status = :status)"

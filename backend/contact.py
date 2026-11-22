@@ -8,7 +8,7 @@ from db import engine
 from security import require_role
 
 # Router: eine Gruppe von Endpoints
-router = APIRouter()
+router = APIRouter(tags=["Contact"])
 
 # Nur der Admin darf die Nachrichten lesen
 admin_only = require_role("admin")

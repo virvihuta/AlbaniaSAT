@@ -6,7 +6,7 @@ from sqlalchemy import text
 from db import engine
 from security import require_role
 
-router = APIRouter()
+router = APIRouter(tags=["FAQ"])
 
 # Admin and redakteur may manage the FAQs (like the articles)
 editor = require_role("admin", "redakteur")

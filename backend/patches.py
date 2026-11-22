@@ -7,7 +7,7 @@ from sqlalchemy import text
 
 from db import engine
 
-router = APIRouter()
+router = APIRouter(tags=["Patches"])
 
 # Start of the image address in Supabase Storage (bucket "patches", public).
 # Not a secret. Can be changed in the .env with PATCH_IMAGE_BASE_URL.
