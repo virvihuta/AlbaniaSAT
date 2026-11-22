@@ -6,7 +6,7 @@ from sqlalchemy import text
 from db import engine
 from security import create_token, verify_password
 
-router = APIRouter(prefix="/auth")
+router = APIRouter(prefix="/auth", tags=["Auth"])
 
 
 class LoginData(BaseModel):

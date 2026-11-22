@@ -14,7 +14,11 @@ from ingest import router as ingest_router
 from metrics import router as metrics_router
 from patches import router as patches_router
 
-app = FastAPI(title="AlbaniaSAT API")
+app = FastAPI(
+    title="AlbaniaSAT API",
+    description="REST API for AlbaniaSAT, the land cover classification of Albania with Sentinel-2 satellite images. Used by the website and the iOS app.",
+    version="1.0.0",
+)
 
 # Websites that may call the API. FRONTEND_URL can hold several addresses, separated by commas,
 # e.g. "https://albaniasat.onrender.com,http://localhost:5173".
@@ -39,6 +43,6 @@ app.include_router(faqs_router)
 app.include_router(metrics_router)
 
 
-@app.api_route("/", methods=["GET", "HEAD"])
+@app.api_route("/", methods=["GET", "HEAD"], tags=["Health"])
 def health():
     return {"status": "ok"}

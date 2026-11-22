@@ -4,7 +4,7 @@ from sqlalchemy import text
 
 from db import engine
 
-router = APIRouter()
+router = APIRouter(tags=["Metrics"])
 
 
 @router.get("/metrics")

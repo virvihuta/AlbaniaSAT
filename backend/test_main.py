@@ -25,3 +25,11 @@ def test_cors_blocks_unknown_website():
 def test_health_head():
     response = client.head("/")
     assert response.status_code == 200
+
+
+def test_docs_have_tags():
+    response = client.get("/openapi.json")
+    assert response.status_code == 200
+    paths = response.json()["paths"]
+    assert paths["/patches/years"]["get"]["tags"] == ["Patches"]
+    assert paths["/metrics"]["get"]["tags"] == ["Metrics"]

@@ -6,7 +6,7 @@ from sqlalchemy import text
 
 from db import engine
 
-router = APIRouter(prefix="/articles")
+router = APIRouter(prefix="/articles", tags=["Articles"])
 
 # Allowed topics (the same list as the check in the database). Other values → 422
 Category = Literal["urban_growth", "forests", "coast", "agriculture", "methodology"]
