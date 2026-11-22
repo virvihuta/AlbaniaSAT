@@ -1,5 +1,5 @@
-# Tests für die Endpoints in patches.py (Regis)
-# Diese Tests schreiben nichts in die Datenbank.
+# Tests for the endpoints in patches.py (Regis)
+# These tests do not write anything to the database.
 from fastapi.testclient import TestClient
 
 from main import app

@@ -1,4 +1,4 @@
-"""klassen codes, namen und mean_confidence
+"""class codes, names and mean_confidence
 
 Revision ID: 0002
 Revises: 0001
@@ -8,21 +8,21 @@ import sqlalchemy as sa
 from alembic import op
 
 # ---------------------------------------------------------------
-# Namen dieser Migration
+# Names of this migration
 # ---------------------------------------------------------------
-# Die Nummer dieser Migration
+# The number of this migration
 revision = "0002"
-# Die Nummer der Migration davor
+# The number of the migration before
 down_revision = "0001"
-# Diese zwei Zeilen brauchen wir nicht. Sie bleiben leer.
+# We do not need these two lines. They stay empty.
 branch_labels = None
 depends_on = None
 
 # ---------------------------------------------------------------
-# Die 7 Klassen: Codes von Virvi, Namen von Suisa
+# The 7 classes: codes from Virvi, names from Suisa
 # ---------------------------------------------------------------
 # id: (code, name_en, name_de, name_sq)
-NEUE_KLASSEN = {
+NEW_CLASSES = {
     0: ("broadleaf_forest", "Broadleaf forest", "Laubwald", "Pyll gjethegjerë"),
     1: ("coniferous_forest", "Coniferous forest", "Nadelwald", "Pyll halor"),
     2: ("cropland", "Cropland", "Ackerland", "Tokë bujqësore"),
@@ -32,9 +32,9 @@ NEUE_KLASSEN = {
     6: ("water", "Water", "Gewässer", "Ujëra"),
 }
 
-# Die alten Namen, damit downgrade sie zurückschreiben kann
+# The old names, so that downgrade can write them back
 # id: (name_en, name_de, name_sq)
-ALTE_KLASSEN = {
+OLD_CLASSES = {
     0: ("Broad-leaved Forest", "Laubwald", "Pyje gjethegjere"),
     1: ("Coniferous Forest", "Nadelwald", "Pyje halore"),
     2: ("Agricultural", "Ackerland", "Toke bujqesore"),
@@ -44,7 +44,7 @@ ALTE_KLASSEN = {
     6: ("Water", "Gewaesser", "Ujera"),
 }
 
-UPDATE_NAMEN = """
+UPDATE_NAMES = """
     UPDATE land_cover_classes
     SET name_en = :name_en, name_de = :name_de, name_sq = :name_sq
     WHERE id = :id
@@ -52,23 +52,23 @@ UPDATE_NAMEN = """
 
 
 def upgrade():
-    # "upgrade" heißt: Die Datenbank bekommt etwas Neues.
+    # "upgrade" means: the database gets something new.
 
-    # 1. Neue Spalte code. Zuerst darf sie leer sein, weil die Klassen noch keinen Code haben.
+    # 1. New column code. First it may be empty, because the classes have no code yet.
     op.add_column("land_cover_classes", sa.Column("code", sa.String(32), nullable=True))
 
-    # 2. Für jede Klasse den Code und die neuen Namen eintragen
-    for class_id, (code, name_en, name_de, name_sq) in NEUE_KLASSEN.items():
+    # 2. Write the code and the new names for every class
+    for class_id, (code, name_en, name_de, name_sq) in NEW_CLASSES.items():
         op.execute(sa.text("UPDATE land_cover_classes SET code = :code WHERE id = :id")
                    .bindparams(id=class_id, code=code))
-        op.execute(sa.text(UPDATE_NAMEN)
+        op.execute(sa.text(UPDATE_NAMES)
                    .bindparams(id=class_id, name_en=name_en, name_de=name_de, name_sq=name_sq))
 
-    # 3. Jetzt hat jede Klasse einen Code: Er darf nicht mehr leer sein und muss einmalig sein
+    # 3. Now every class has a code: it may not be empty anymore and must be unique
     op.alter_column("land_cover_classes", "code", nullable=False)
     op.create_unique_constraint("uq_land_cover_classes_code", "land_cover_classes", ["code"])
 
-    # 4. Neue Spalte mean_confidence: Kommazahl von 0 bis 1, darf leer sein (alte Zeilen)
+    # 4. New column mean_confidence: decimal number from 0 to 1, may be empty (old rows)
     op.add_column("region_year_summaries", sa.Column("mean_confidence", sa.Float(), nullable=True))
     op.create_check_constraint(
         "ck_region_year_summaries_mean_confidence",
@@ -78,17 +78,17 @@ def upgrade():
 
 
 def downgrade():
-    # "downgrade" heißt: Die Änderung zurücknehmen, genau in umgekehrter Reihenfolge.
+    # "downgrade" means: take the change back, exactly in the opposite order.
 
-    # 4. mean_confidence wieder weg
+    # 4. Remove mean_confidence
     op.drop_constraint("ck_region_year_summaries_mean_confidence", "region_year_summaries", type_="check")
     op.drop_column("region_year_summaries", "mean_confidence")
 
-    # 3. und 1. Spalte code wieder weg
+    # 3. and 1. Remove the column code
     op.drop_constraint("uq_land_cover_classes_code", "land_cover_classes", type_="unique")
     op.drop_column("land_cover_classes", "code")
 
-    # 2. Die alten Namen zurückschreiben
-    for class_id, (name_en, name_de, name_sq) in ALTE_KLASSEN.items():
-        op.execute(sa.text(UPDATE_NAMEN)
+    # 2. Write the old names back
+    for class_id, (name_en, name_de, name_sq) in OLD_CLASSES.items():
+        op.execute(sa.text(UPDATE_NAMES)
                    .bindparams(id=class_id, name_en=name_en, name_de=name_de, name_sq=name_sq))
