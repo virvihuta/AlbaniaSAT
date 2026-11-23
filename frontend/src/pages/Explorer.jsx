@@ -159,10 +159,11 @@ export default function Explorer() {
   const patch = patches?.features.find((f) => f.properties.id === patchId)?.properties
 
   // Probabilities of the clicked patch, highest first: [{ class, value }, ...]
+  // The keys can be class codes ("cropland") or the old database ids ("2"), both work.
   const probabilities = useMemo(() => {
     if (!patchDetail?.probabilities) return []
     return Object.entries(patchDetail.probabilities)
-      .map(([id, value]) => ({ landCover: classOf(Number(id)), value }))
+      .map(([key, value]) => ({ landCover: landCoverClasses.find((c) => c.code === key) || classOf(Number(key)), value }))
       .filter((p) => p.landCover)
       .sort((a, b) => b.value - a.value)
   }, [patchDetail, classOf])
