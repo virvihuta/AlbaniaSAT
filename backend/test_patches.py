@@ -49,6 +49,7 @@ def test_patch_by_id():
     patch = response.json()
     assert patch["id"] == 1
     assert patch["probabilities"] is not None
+    assert "broadleaf_forest" in patch["probabilities"]
     assert patch["image_url"].startswith("https://")
 
 
