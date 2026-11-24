@@ -151,16 +151,16 @@ export default function Home() {
       <section className="relative overflow-hidden bg-neutral-950 text-white">
         <Contours className="opacity-[0.12]" />
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_85%_30%,rgba(191,30,45,0.35),transparent_55%)]" />
-        <div className="relative mx-auto grid max-w-7xl items-center gap-16 px-6 pt-20 pb-36 md:px-10 lg:grid-cols-[1.25fr_1fr] lg:pt-24">
+        <div className="relative mx-auto grid max-w-7xl items-center gap-10 px-6 pt-10 pb-32 md:px-10 lg:grid-cols-[1.25fr_1fr] lg:pt-12">
           <div className="hero-in">
             <p className="flex items-center gap-3 text-xs font-medium uppercase tracking-[0.2em] text-white/60">
               <span className="h-px w-8 bg-primary" /> {t('home.heroBadge')}
             </p>
-            <h1 className="mt-8 text-5xl leading-[1.05] tracking-tight md:text-7xl">
+            <h1 className="mt-5 text-4xl leading-[1.08] tracking-tight sm:text-5xl xl:text-6xl">
               {taglineStart} <span className="font-normal text-[#ff5a67]">{taglineEnd.join(' ')}</span>
             </h1>
-            <p className="mt-8 max-w-xl text-lg leading-relaxed text-white/70">{t('home.intro')}</p>
-            <div className="mt-10 flex flex-wrap gap-4">
+            <p className="mt-6 max-w-xl text-lg leading-relaxed text-white/70">{t('home.intro')}</p>
+            <div className="mt-8 flex flex-wrap gap-4">
               <Link
                 to="/explorer"
                 className="rounded-lg bg-primary px-6 py-3.5 font-semibold text-white shadow-lg shadow-primary/30 transition hover:-translate-y-0.5 hover:shadow-primary/50"
