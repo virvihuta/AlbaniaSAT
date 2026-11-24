@@ -14,15 +14,17 @@ const links = [
 
 // Header with logo and navigation, the page content and the footer.
 // full = true is for the map: the page uses the whole width and has no footer.
-export default function PublicLayout({ children, full = false }) {
+// wide = true is for the start page: sections go from edge to edge, the footer stays.
+export default function PublicLayout({ children, full = false, wide = false }) {
   const { t } = useLanguage()
 
   return (
     <div className="flex min-h-screen flex-col">
       <header className="sticky top-0 z-[1100] border-b border-border bg-surface">
-        <div className={'mx-auto flex h-24 items-center gap-3 px-4 sm:gap-6 sm:px-6 md:px-10 ' + (full ? '' : 'max-w-7xl')}>
+        {/* On phones the menu gets its own row under the logo, so nothing is cut off */}
+        <div className={'mx-auto flex flex-wrap items-center gap-x-3 px-4 pt-3 sm:h-24 sm:flex-nowrap sm:gap-6 sm:px-6 sm:pt-0 md:px-10 ' + (full ? '' : 'max-w-7xl')}>
           <Logo big />
-          <nav className="flex h-full sm:ml-10 sm:gap-2">
+          <nav className="order-last -mx-2 flex h-12 w-full overflow-x-auto sm:order-none sm:mx-0 sm:ml-10 sm:h-full sm:w-auto sm:gap-2">
             {links.map((link) => (
               <NavLink
                 key={link.to}
@@ -46,7 +48,7 @@ export default function PublicLayout({ children, full = false }) {
         </div>
       </header>
 
-      {full ? (
+      {full || wide ? (
         <main className="flex-1">{children}</main>
       ) : (
         <main className="mx-auto w-full max-w-7xl flex-1 px-6 py-16 md:px-10">{children}</main>
