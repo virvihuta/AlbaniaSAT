@@ -93,17 +93,18 @@ export default function AlbaniaOutline() {
 
   if (!map) {
     // Space holder while the regions load, so the page does not jump
-    return <div className="aspect-[1/2] w-full max-w-[16rem] animate-pulse rounded-3xl bg-white/5 sm:max-w-sm lg:max-w-md" />
+    return <div className="h-[46vh] w-[22vh] animate-pulse rounded-3xl bg-white/5 sm:h-[min(64vh,600px)] sm:w-[min(31vh,290px)]" />
   }
 
   const pad = 28
   const viewBox = `${-pad} ${-pad} ${WIDTH + pad * 2} ${map.height + pad * 2}`
 
   return (
-    <div className="relative w-full max-w-[16rem] sm:max-w-sm lg:max-w-md">
+    // The height follows the screen, so the whole map fits next to the title when the page opens
+    <div className="relative">
       <svg
         viewBox={viewBox}
-        className="h-auto w-full overflow-visible"
+        className="h-[46vh] w-auto max-w-full overflow-visible sm:h-[min(64vh,600px)]"
         role="img"
         aria-label="Albania"
         onMouseMove={(e) => {
