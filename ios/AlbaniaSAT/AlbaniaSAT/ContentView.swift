@@ -4,24 +4,24 @@ struct ContentView: View {
     // The chosen language
     @AppStorage("language") private var language = "en"
 
-    // Light or dark mode chosen with the AppearanceButton ("system" = like the iPhone)
-    @AppStorage("appearance") private var appearance = "system"
+    // true = dark mode, false = light mode
+    @AppStorage("darkMode") private var darkMode = false
 
-    private var chosenScheme: ColorScheme? {
-        switch appearance {
-        case "light": return .light
-        case "dark": return .dark
-        default: return nil
-        }
-    }
+    // true = the user has already seen the welcome pages
+    @AppStorage("onboardingDone") private var onboardingDone = false
 
     var body: some View {
-        // NavigationStack: screens are "stacked", swiping back works automatically
-        NavigationStack {
-            LanguageView()
+        Group {
+            if onboardingDone {
+                MainTabView()
+            } else {
+                NavigationStack {
+                    LanguageView()
+                }
+            }
         }
         .environment(\.locale, Locale(identifier: language))
-        .preferredColorScheme(chosenScheme)
+        .preferredColorScheme(darkMode ? .dark : .light)
     }
 }
 

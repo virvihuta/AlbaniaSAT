@@ -4,6 +4,9 @@ struct WelcomeView: View {
     // Which page is showing right now (0, 1 or 2)
     @State private var page = 0
 
+    // true = the user has already seen the welcome pages
+    @AppStorage("onboardingDone") private var onboardingDone = false
+
     // The 3 pages: image, headline, text
     let pages: [(String, LocalizedStringKey, LocalizedStringKey)] = [
         ("welcome1", "See Albania from space",
@@ -51,7 +54,8 @@ struct WelcomeView: View {
                 if page < 2 {
                     withAnimation { page += 1 }
                 } else {
-                    print("Open the map")
+                    // Welcome pages done: ContentView now shows the tabs
+                    onboardingDone = true
                 }
             } label: {
                 Text(page < 2 ? LocalizedStringKey("Next") : LocalizedStringKey("Open the map"))
@@ -64,8 +68,8 @@ struct WelcomeView: View {
             }
         }
         .padding(.horizontal, 20)
-        
-        // Oben in der Leiste: links automatisch "Zurück", rechts "Skip"
+
+        // In the bar at the top: "Back" on the left (automatic), "Skip" on the right
         .toolbar {
             if page < 2 {
                 Button("Skip") {
