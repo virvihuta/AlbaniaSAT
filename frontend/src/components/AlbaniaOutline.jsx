@@ -65,6 +65,7 @@ export default function AlbaniaOutline() {
   const navigate = useNavigate()
   const [regions, setRegions] = useState(null)
   const [hovered, setHovered] = useState(null)
+  const [mouse, setMouse] = useState({ x: 0, y: 0 }) // mouse position inside the map, for the name label
 
   useEffect(() => {
     fetch(REGIONS_FILE)
@@ -100,7 +101,16 @@ export default function AlbaniaOutline() {
 
   return (
     <div className="relative w-full max-w-[16rem] sm:max-w-sm lg:max-w-md">
-      <svg viewBox={viewBox} className="h-auto w-full overflow-visible" role="img" aria-label="Albania">
+      <svg
+        viewBox={viewBox}
+        className="h-auto w-full overflow-visible"
+        role="img"
+        aria-label="Albania"
+        onMouseMove={(e) => {
+          const box = e.currentTarget.getBoundingClientRect()
+          setMouse({ x: e.clientX - box.left, y: e.clientY - box.top })
+        }}
+      >
         <defs>
           <clipPath id="albania-clip">
             {map.shapes.map((s) => (
@@ -199,9 +209,17 @@ export default function AlbaniaOutline() {
         </g>
       </svg>
 
-      <p className="mt-2 text-center text-xs uppercase tracking-[0.2em] text-white/50">
-        {hovered ? <span className="text-white">{hovered.name}</span> : t('home.mapHint')}
-      </p>
+      {/* Name of the region next to the mouse */}
+      {hovered && (
+        <div
+          className="pointer-events-none absolute z-10 -translate-x-1/2 -translate-y-[130%] whitespace-nowrap rounded-lg bg-white px-3 py-1.5 text-sm font-semibold text-neutral-950 shadow-lg"
+          style={{ left: mouse.x, top: mouse.y }}
+        >
+          {hovered.name}
+        </div>
+      )}
+
+      <p className="mt-2 text-center text-xs uppercase tracking-[0.2em] text-white/50">{t('home.mapHint')}</p>
     </div>
   )
 }
