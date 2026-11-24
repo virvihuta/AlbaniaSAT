@@ -3,9 +3,10 @@
 // are kept visible. Every 6th step in the list below is 1 (visible), the rest 0.
 const bands = Array(10).fill('0 0 0 0 0 1').join(' ')
 
-export default function Contours() {
+// className sets how strong the lines are, for example opacity-10 behind text.
+export default function Contours({ className = 'opacity-30' }) {
   return (
-    <svg className="drift absolute -inset-40 h-[calc(100%+20rem)] w-[calc(100%+20rem)] opacity-30">
+    <svg className={`drift absolute -inset-40 h-[calc(100%+20rem)] w-[calc(100%+20rem)] ${className}`}>
       <filter id="topo" x="0" y="0" width="100%" height="100%">
         {/* The random terrain. The animate tag slowly changes it so the lines flow. */}
         <feTurbulence type="fractalNoise" baseFrequency="0.003 0.005" numOctaves="3" seed="12">

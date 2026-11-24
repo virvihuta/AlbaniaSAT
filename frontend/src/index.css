@@ -1,103 +1,53 @@
-@import "tailwindcss";
 
-/* Every variable here becomes a Tailwind class: --color-primary -> bg-primary, text-primary */
-@theme {
-  /* Brand */
-  --color-primary: #bf1e2d;
-
-  /* Light mode (default) */
-  --color-background: #f5f5f5;
-  --color-surface: #ffffff;
-  --color-foreground: #1a1a1a;
-  --color-muted: #6b6b6b;
-  --color-border: #e0e0e0;
-
-  /* The 7 land cover classes of the model. The list with codes is in src/landCover.js */
-  --color-lc-broadleaf: #4c9a3c;
-  --color-lc-coniferous: #17643b;
-  --color-lc-cropland: #f0a93b;
-  --color-lc-grass-shrub: #cbd05a;
-  --color-lc-olive: #8f9e6b;
-  --color-lc-builtup: #8c5ec4;
-  --color-lc-water: #2b7fd4;
-
-  /* Fonts */
-  --font-sans: "Google Sans", "Segoe UI", Arial, sans-serif;
-  --font-heading: "Montserrat", sans-serif;
+/* Start page: hero text fades in and moves up a little when the page opens */
+.hero-in {
+  animation: hero-in 0.9s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+@keyframes hero-in {
+  from { opacity: 0; transform: translateY(24px); }
 }
 
-/* Dark mode: put data-theme="dark" on <html> and these colors take over */
-[data-theme="dark"] {
-  --color-background: #121212;
-  --color-surface: #1c1c1c;
-  --color-foreground: #f2f2f2;
-  --color-muted: #a0a0a0;
-  --color-border: #333333;
+/* Start page: regions of the Albania map appear one after another */
+.region-in {
+  animation: region-in 0.6s ease-out both;
+}
+@keyframes region-in {
+  from { opacity: 0; }
 }
 
-@layer base {
-  /* Hand cursor on everything you can click (Tailwind v4 removed it for buttons) */
-  button:not(:disabled),
-  [role='button'],
-  select,
-  label[for],
-  input[type='checkbox'] {
-    cursor: pointer;
-  }
-  button:disabled {
-    cursor: not-allowed;
-  }
-  body {
-    @apply bg-background text-foreground;
-  }
-  h1, h2, h3 {
-    @apply font-heading font-light;
-  }
+/* Start page: red line that scans over the country like a satellite */
+.scan {
+  animation: scan 5s linear infinite;
+}
+@keyframes scan {
+  to { transform: translateY(var(--scan-distance)); }
 }
 
-/* Small grey label above big headings, like "STORY" */
-.eyebrow {
-  @apply text-xs uppercase tracking-[0.15em] text-muted;
+/* Sections that slide up softly when you scroll to them (see Reveal.jsx) */
+.reveal {
+  opacity: 0;
+  transform: translateY(28px);
+  transition: opacity 0.8s ease, transform 0.8s cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+.reveal.is-visible {
+  opacity: 1;
+  transform: none;
 }
 
-/* Slow movement of the contour lines on the login page */
-.drift {
-  animation: drift 20s ease-in-out infinite alternate;
+/* Start page: red ring that pulses around the capital on the map */
+.city-pulse {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: city-pulse 2.4s ease-out infinite;
+}
+@keyframes city-pulse {
+  from { transform: scale(0.4); opacity: 0.8; }
+  to { transform: scale(2.2); opacity: 0; }
 }
 
-@keyframes drift {
-  to { transform: translate(-120px, -80px); }
-}
-
-/* Leaflet map: tooltips and controls in our colors and fonts */
-.leaflet-container {
-  font-family: var(--font-sans);
-  background: var(--color-background);
-}
-.map-tooltip {
-  border: 0;
-  border-radius: 6px;
-  background: #1a1a1a;
-  color: #fff;
-  font-weight: 600;
-  box-shadow: none;
-}
-.map-tooltip::before {
-  display: none;
-}
-/* Grey background map, and a dark one in dark mode */
-.map-tiles {
-  filter: grayscale(1) brightness(1.05) contrast(0.9);
-}
-[data-theme="dark"] .map-tiles {
-  filter: grayscale(1) invert(1) brightness(0.75) contrast(0.9);
-}
-[data-theme="dark"] .leaflet-bar a {
-  background: var(--color-surface);
-  color: var(--color-foreground);
-  border-color: var(--color-border);
-}
-[data-theme="dark"] .leaflet-control-attribution {
-  background: rgba(28, 28, 28, 0.8);
-  color: var(--color-muted);
+/* No movement for people who turned animations off in their system settings */
+@media (prefers-reduced-motion: reduce) {
+  .hero-in, .region-in, .scan, .drift, .city-pulse { animation: none; }
+  .city-pulse { opacity: 0; }
+  .reveal { opacity: 1; transform: none; transition: none; }
 }
