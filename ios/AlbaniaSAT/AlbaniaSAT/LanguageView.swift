@@ -4,6 +4,9 @@ struct LanguageView: View {
     // The chosen language is saved on the iPhone
     @AppStorage("language") private var language = "en"
 
+    // true = dark mode, false = light mode
+    @AppStorage("darkMode") private var darkMode = false
+
     // The three languages: code and name
     let languages = [("sq", "Shqip"), ("en", "English"), ("de", "Deutsch")]
 
@@ -90,7 +93,11 @@ struct LanguageView: View {
         // Light/dark mode button at the top right
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
-                AppearanceButton()
+                Button {
+                    darkMode.toggle()
+                } label: {
+                    Image(systemName: darkMode ? "sun.max.fill" : "moon.fill")
+                }
             }
         }
     }
