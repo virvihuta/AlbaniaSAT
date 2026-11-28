@@ -12,15 +12,20 @@ struct LanguageView: View {
 
             // Logo and name next to each other
             HStack(spacing: 16) {
-                // Logo: red rectangle in the back, white lines in front
-                ZStack {
-                    Rectangle()
-                        .fill(Color.brandRed)
-                    Image("contours")
-                        .resizable()
-                        .scaledToFit()
-                }
-                .frame(width: 54, height: 72)
+                // Logo: red rectangle, the white lines are cut out (transparent)
+                Rectangle()
+                    .fill(Color.brandRed)
+                    .frame(width: 54, height: 72)
+                    .mask {
+                        ZStack {
+                            Rectangle()
+                            Image("contours")
+                                .resizable()
+                                .scaledToFit()
+                                .blendMode(.destinationOut)
+                        }
+                        .compositingGroup()
+                    }
                 VStack(alignment: .leading) {
                     Text("AlbaniaSAT")
                         .font(.montserratBold(34))
