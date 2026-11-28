@@ -7,6 +7,9 @@ struct WelcomeView: View {
     // true = the user has already seen the welcome pages
     @AppStorage("onboardingDone") private var onboardingDone = false
 
+    // true = dark mode, false = light mode
+    @AppStorage("darkMode") private var darkMode = false
+
     // The 3 pages: image, headline, text
     let pages: [(String, LocalizedStringKey, LocalizedStringKey)] = [
         ("welcome1", "See Albania from space",
@@ -69,7 +72,7 @@ struct WelcomeView: View {
         }
         .padding(.horizontal, 20)
 
-        // In the bar at the top: "Back" on the left (automatic), "Skip" on the right
+        // In the bar at the top: "Back" on the left (automatic), "Skip" and light/dark on the right
         .toolbar {
             ToolbarItemGroup(placement: .topBarTrailing) {
                 if page < 2 {
@@ -78,7 +81,11 @@ struct WelcomeView: View {
                     }
                     .foregroundStyle(Color.brandRed)
                 }
-                AppearanceButton()
+                Button {
+                    darkMode.toggle()
+                } label: {
+                    Image(systemName: darkMode ? "sun.max.fill" : "moon.fill")
+                }
             }
         }
     }
