@@ -30,6 +30,18 @@ struct Article: Codable, Identifiable {
         default: return nil
         }
     }
+
+    // Symbol for the category (SF Symbols)
+    var categoryIcon: String {
+        switch category {
+        case "urban_growth": return "building.2.fill"
+        case "forests": return "tree.fill"
+        case "coast": return "water.waves"
+        case "agriculture": return "leaf.fill"
+        case "methodology": return "lightbulb.fill"
+        default: return "newspaper.fill"
+        }
+    }
 }
 
 // One page of articles: {"items": [...], "total": 21, "page": 1, "page_size": 9}
