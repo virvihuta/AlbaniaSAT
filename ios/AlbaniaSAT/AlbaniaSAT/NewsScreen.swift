@@ -1,12 +1,12 @@
 import SwiftUI
 
-// News tab: the articles from the API as cards (Regis)
+// Stories tab: the articles from the API as cards, like on the website
 struct NewsScreen: View {
     @State private var model = NewsViewModel()
 
     var body: some View {
         ScrollView {
-            VStack(spacing: 16) {
+            VStack(spacing: 20) {
                 ForEach(model.articles) { article in
                     ArticleCard(article: article)
                 }
@@ -19,8 +19,6 @@ struct NewsScreen: View {
                         HStack(spacing: 8) {
                             if model.isLoading {
                                 ProgressView()
-                            } else {
-                                Image(systemName: "arrow.down.circle.fill")
                             }
                             Text("Load more")
                                 .font(.montserratBold(16))
@@ -31,7 +29,6 @@ struct NewsScreen: View {
                         .background(Color.brandRed.opacity(0.1))
                         .clipShape(Capsule())
                     }
-                    .padding(.top, 8)
                 }
             }
             .padding(16)
@@ -47,7 +44,7 @@ struct NewsScreen: View {
                 VStack(spacing: 16) {
                     Image(systemName: "exclamationmark.triangle")
                         .font(.largeTitle)
-                    Text("The news didn't load")
+                    Text("The stories didn't load")
                         .font(.montserratBold(20))
                     Text("Check your connection and try again.")
                         .font(.montserrat(15))
@@ -67,7 +64,7 @@ struct NewsScreen: View {
                 .padding()
             }
         }
-        .navigationTitle("News")
+        .navigationTitle("Stories")
         // Load the first page when the tab opens
         .task {
             if model.articles.isEmpty {
@@ -81,62 +78,83 @@ struct NewsScreen: View {
     }
 }
 
-// One article as a card
+// One article as a card: color stripes on top, then the text
 struct ArticleCard: View {
     let article: Article
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 12) {
+        VStack(alignment: .leading, spacing: 0) {
 
-            // Top: category badge and date
-            HStack {
+            ArticleCover()
+                .frame(height: 160)
+
+            VStack(alignment: .leading, spacing: 14) {
+                // Category: grey, capital letters, with space between the letters
                 if let categoryName = article.categoryName {
-                    Label(categoryName, systemImage: article.categoryIcon)
-                        .font(.montserratBold(12))
-                        .foregroundStyle(Color.brandRed)
-                        .padding(.horizontal, 10)
-                        .padding(.vertical, 6)
-                        .background(Color.brandRed.opacity(0.1))
-                        .clipShape(Capsule())
-                }
-                Spacer()
-                if let date = article.date {
-                    Text(date, format: .dateTime.day().month(.abbreviated).year())
-                        .font(.montserrat(13))
+                    Text(categoryName)
+                        .font(.montserrat(12))
+                        .tracking(2)
+                        .textCase(.uppercase)
                         .foregroundStyle(.secondary)
                 }
-            }
 
-            // Title and summary
-            Text(article.title)
-                .font(.montserratBold(19))
-            if let summary = article.summary {
-                Text(summary)
-                    .font(.montserrat(15))
-                    .foregroundStyle(.secondary)
-                    .lineLimit(3)
-            }
+                // Big thin title
+                Text(article.title)
+                    .font(.montserratLight(28))
 
-            // Bottom: author and "Read"
-            HStack {
-                if let author = article.author {
-                    Label(author, systemImage: "person.circle.fill")
-                        .font(.montserrat(13))
+                if let summary = article.summary {
+                    Text(summary)
+                        .font(.montserrat(15))
                         .foregroundStyle(.secondary)
+                        .lineLimit(3)
                 }
-                Spacer()
-                HStack(spacing: 4) {
-                    Text("Read")
+
+                // Author: circle with initials, name and date
+                HStack(spacing: 12) {
+                    Text(article.initials)
+                        .font(.montserratBold(13))
+                        .frame(width: 40, height: 40)
+                        .background(Color(.systemGroupedBackground))
+                        .clipShape(Circle())
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text(article.authorName)
+                            .font(.montserratBold(14))
+                        if let date = article.date {
+                            Text(date, format: .dateTime.day().month(.abbreviated).year())
+                                .font(.montserrat(13))
+                                .foregroundStyle(.secondary)
+                        }
+                    }
+                    Spacer()
                     Image(systemName: "chevron.right")
+                        .foregroundStyle(Color.brandRed)
                 }
-                .font(.montserratBold(14))
-                .foregroundStyle(Color.brandRed)
+                .padding(.top, 4)
             }
+            .padding(20)
         }
-        .padding(16)
-        .frame(maxWidth: .infinity, alignment: .leading)
         .background(Color(.secondarySystemGroupedBackground))
         .clipShape(RoundedRectangle(cornerRadius: 20))
         .shadow(color: .black.opacity(0.06), radius: 8, y: 4)
+    }
+}
+
+// Diagonal stripes in the land cover colors, the same as the website when there is no image
+struct ArticleCover: View {
+    var body: some View {
+        LinearGradient(
+            stops: [
+                .init(color: .lcCropland, location: 0),
+                .init(color: .lcCropland, location: 0.35),
+                .init(color: .lcBuiltUp, location: 0.35),
+                .init(color: .lcBuiltUp, location: 0.45),
+                .init(color: .lcGrassShrub, location: 0.45),
+                .init(color: .lcGrassShrub, location: 0.60),
+                .init(color: .lcConiferous, location: 0.60),
+                .init(color: .lcConiferous, location: 1)
+            ],
+            startPoint: .topLeading,
+            endPoint: .bottomTrailing
+        )
     }
 }

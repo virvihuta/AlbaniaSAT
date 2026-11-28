@@ -22,7 +22,7 @@ struct MainTabView: View {
                 NewsScreen()
             }
             .tabItem {
-                Label("News", systemImage: "newspaper")
+                Label("Stories", systemImage: "newspaper")
             }
 
             NavigationStack {
