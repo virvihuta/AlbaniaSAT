@@ -71,11 +71,14 @@ struct WelcomeView: View {
 
         // In the bar at the top: "Back" on the left (automatic), "Skip" on the right
         .toolbar {
-            if page < 2 {
-                Button("Skip") {
-                    withAnimation { page = 2 }
+            ToolbarItemGroup(placement: .topBarTrailing) {
+                if page < 2 {
+                    Button("Skip") {
+                        withAnimation { page = 2 }
+                    }
+                    .foregroundStyle(Color.brandRed)
                 }
-                .foregroundStyle(Color.brandRed)
+                AppearanceButton()
             }
         }
     }
