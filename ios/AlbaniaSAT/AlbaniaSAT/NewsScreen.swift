@@ -1,33 +1,42 @@
 import SwiftUI
 
-// News tab: the list of articles from the API (Regis)
+// News tab: the articles from the API as cards (Regis)
 struct NewsScreen: View {
     @State private var model = NewsViewModel()
 
     var body: some View {
-        List {
-            ForEach(model.articles) { article in
-                ArticleRow(article: article)
-            }
+        ScrollView {
+            VStack(spacing: 16) {
+                ForEach(model.articles) { article in
+                    ArticleCard(article: article)
+                }
 
-            // Button at the end of the list, only if there are more articles
-            if model.hasMore {
-                Button {
-                    Task { await model.loadMore() }
-                } label: {
-                    if model.isLoading {
-                        ProgressView()
-                            .frame(maxWidth: .infinity)
-                    } else {
-                        Text("Load more")
-                            .font(.montserrat(17))
-                            .foregroundStyle(Color.brandRed)
-                            .frame(maxWidth: .infinity)
+                // Button at the end, only if there are more articles
+                if model.hasMore {
+                    Button {
+                        Task { await model.loadMore() }
+                    } label: {
+                        HStack(spacing: 8) {
+                            if model.isLoading {
+                                ProgressView()
+                            } else {
+                                Image(systemName: "arrow.down.circle.fill")
+                            }
+                            Text("Load more")
+                                .font(.montserratBold(16))
+                        }
+                        .foregroundStyle(Color.brandRed)
+                        .padding(.horizontal, 24)
+                        .padding(.vertical, 12)
+                        .background(Color.brandRed.opacity(0.1))
+                        .clipShape(Capsule())
                     }
+                    .padding(.top, 8)
                 }
             }
+            .padding(16)
         }
-        .listStyle(.plain)
+        .background(Color(.systemGroupedBackground))
         .overlay {
             // First loading: a circle in the middle
             if model.articles.isEmpty && model.isLoading {
@@ -47,12 +56,12 @@ struct NewsScreen: View {
                         Task { await model.reload() }
                     } label: {
                         Text("Try again")
-                            .font(.montserrat(17))
+                            .font(.montserratBold(16))
                             .padding(.horizontal, 24)
                             .padding(.vertical, 12)
                             .background(Color.brandRed)
                             .foregroundStyle(.white)
-                            .clipShape(RoundedRectangle(cornerRadius: 12))
+                            .clipShape(Capsule())
                     }
                 }
                 .padding()
@@ -65,39 +74,69 @@ struct NewsScreen: View {
                 await model.loadMore()
             }
         }
-        // Pull the list down to load again
+        // Pull down to load again
         .refreshable {
             await model.reload()
         }
     }
 }
 
-// One row in the list: category, title, summary, date
-struct ArticleRow: View {
+// One article as a card
+struct ArticleCard: View {
     let article: Article
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 6) {
-            if let categoryName = article.categoryName {
-                Text(categoryName)
-                    .font(.montserratBold(12))
-                    .foregroundStyle(Color.brandRed)
-                    .textCase(.uppercase)
+        VStack(alignment: .leading, spacing: 12) {
+
+            // Top: category badge and date
+            HStack {
+                if let categoryName = article.categoryName {
+                    Label(categoryName, systemImage: article.categoryIcon)
+                        .font(.montserratBold(12))
+                        .foregroundStyle(Color.brandRed)
+                        .padding(.horizontal, 10)
+                        .padding(.vertical, 6)
+                        .background(Color.brandRed.opacity(0.1))
+                        .clipShape(Capsule())
+                }
+                Spacer()
+                if let date = article.date {
+                    Text(date, format: .dateTime.day().month(.abbreviated).year())
+                        .font(.montserrat(13))
+                        .foregroundStyle(.secondary)
+                }
             }
+
+            // Title and summary
             Text(article.title)
-                .font(.montserratBold(18))
+                .font(.montserratBold(19))
             if let summary = article.summary {
                 Text(summary)
                     .font(.montserrat(15))
                     .foregroundStyle(.secondary)
                     .lineLimit(3)
             }
-            if let date = article.date {
-                Text(date, format: .dateTime.day().month(.wide).year())
-                    .font(.montserrat(13))
-                    .foregroundStyle(.secondary)
+
+            // Bottom: author and "Read"
+            HStack {
+                if let author = article.author {
+                    Label(author, systemImage: "person.circle.fill")
+                        .font(.montserrat(13))
+                        .foregroundStyle(.secondary)
+                }
+                Spacer()
+                HStack(spacing: 4) {
+                    Text("Read")
+                    Image(systemName: "chevron.right")
+                }
+                .font(.montserratBold(14))
+                .foregroundStyle(Color.brandRed)
             }
         }
-        .padding(.vertical, 8)
+        .padding(16)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(Color(.secondarySystemGroupedBackground))
+        .clipShape(RoundedRectangle(cornerRadius: 20))
+        .shadow(color: .black.opacity(0.06), radius: 8, y: 4)
     }
 }
