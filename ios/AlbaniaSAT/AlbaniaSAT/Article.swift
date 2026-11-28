@@ -31,16 +31,16 @@ struct Article: Codable, Identifiable {
         }
     }
 
-    // Symbol for the category (SF Symbols)
-    var categoryIcon: String {
-        switch category {
-        case "urban_growth": return "building.2.fill"
-        case "forests": return "tree.fill"
-        case "coast": return "water.waves"
-        case "agriculture": return "leaf.fill"
-        case "methodology": return "lightbulb.fill"
-        default: return "newspaper.fill"
-        }
+    // Name of the author, or the team if there is none
+    var authorName: String {
+        author ?? "AlbaniaSAT Team"
+    }
+
+    // "Suisa Shehi" becomes "SS"
+    var initials: String {
+        let parts = authorName.split(separator: " ")
+        let letters = parts.compactMap { $0.first }
+        return String(letters.prefix(2))
     }
 }
 
